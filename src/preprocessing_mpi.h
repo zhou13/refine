@@ -27,10 +27,10 @@
 class PreprocessingMpi: public Preprocessing
 {
 private:
-	MpiNode *node;
+    MpiNode *node;
 
 public:
-	/** Destructor, calls MPI_Finalize */
+    /** Destructor, calls MPI_Finalize */
     ~PreprocessingMpi()
     {
         delete node;

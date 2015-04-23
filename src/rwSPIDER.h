@@ -202,8 +202,8 @@ int  readSPIDER(long int img_select)
 
     if (isStack && dataflag<0)   // Don't read the individual header and the data if not necessary
     {
-    	delete header;
-    	return 0;
+        delete header;
+        return 0;
     }
 
     size_t header_size = offset;
@@ -308,9 +308,9 @@ int  writeSPIDER(long int select_img=-1, bool isStack=false, int mode=WRITE_OVER
 #endif
 
     if ( Zdim < 2 )
-    	header->iform = 1;     // 2D image
+        header->iform = 1;     // 2D image
     else
-    	header->iform = 3;     // 3D volume
+        header->iform = 3;     // 3D volume
     double aux;
     bool baux;
     header->imami = 0;//never trust max/min
@@ -318,9 +318,9 @@ int  writeSPIDER(long int select_img=-1, bool isStack=false, int mode=WRITE_OVER
     if (!MDMainHeader.isEmpty())
     {
 #ifdef DEBUG
-    	std::cerr<<"Non-empty MDMainHeader"<<std::endl;
+        std::cerr<<"Non-empty MDMainHeader"<<std::endl;
 #endif
-    	if(MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN,   aux))
+        if(MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN,   aux))
             header->fmin = (float)aux;
         if(MDMainHeader.getValue(EMDL_IMAGE_STATS_MAX,   aux))
             header->fmax = (float)aux;
@@ -393,7 +393,7 @@ int  writeSPIDER(long int select_img=-1, bool isStack=false, int mode=WRITE_OVER
     //write only once, ignore select_img
     if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
     {
-    	castPage2Datatype(MULTIDIM_ARRAY(data), fdata, Float, datasize_n);
+        castPage2Datatype(MULTIDIM_ARRAY(data), fdata, Float, datasize_n);
         fwrite( fdata, datasize, 1, fimg );
     }
 

@@ -592,7 +592,7 @@ public:
      */
     MultidimArray(const MultidimArray<T>& V)
     {
-    	coreInit();
+        coreInit();
         *this = V;
     }
 
@@ -1278,7 +1278,7 @@ public:
      */
     void window(MultidimArray<T> &result, long int x0, long int xF, T init_value = 0, long n = 0) const
     {
-    	result.resize(xF - x0 + 1);
+        result.resize(xF - x0 + 1);
         STARTINGX(result) = x0;
 
         for (long int j = x0; j <= xF; j++)
@@ -1292,8 +1292,8 @@ public:
     // As above but acts on itself
     void window(long int x0, long int xF, T init_value = 0, long n = 0)
     {
-    	MultidimArray<T> result;
-    	window(result, x0, xF, init_value, n);
+        MultidimArray<T> result;
+        window(result, x0, xF, init_value, n);
         *this = result;
     }
 
@@ -1729,7 +1729,7 @@ public:
             REPORT_ERROR( "setImage: MultidimArray dimensions different from the input image ones");
 
         FOR_ALL_DIRECT_ELEMENTS_IN_ARRAY3D(M)
-			DIRECT_NZYX_ELEM(*this, n, k, i, j) = DIRECT_A3D_ELEM(M, k, i, j);
+            DIRECT_NZYX_ELEM(*this, n, k, i, j) = DIRECT_A3D_ELEM(M, k, i, j);
 
     }
 
@@ -3324,9 +3324,9 @@ public:
 
         // resize center to the correct dimensionality
         if (getDim() == 2)
-        	center.resize(2);
+            center.resize(2);
         else if (getDim() == 1)
-        	center.resize(1);
+            center.resize(1);
 
     }
 
@@ -3348,7 +3348,7 @@ public:
     /** Get the indices that sort the 1D vector elements (original array intact)
      *
      * @code
-	 * MultidimArray<long int> idx(v1.size());
+     * MultidimArray<long int> idx(v1.size());
      * v1.sorted_index(idx);
      * @endcode
      */
@@ -3361,7 +3361,7 @@ public:
         vp.reserve(XSIZE(*this));
         FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(*this)
         {
-        	vp.push_back(std::make_pair(DIRECT_MULTIDIM_ELEM(*this,n), n));
+            vp.push_back(std::make_pair(DIRECT_MULTIDIM_ELEM(*this,n), n));
         }
         // Sort on the first elements of the pairs
         std::sort(vp.begin(), vp.end());
@@ -3369,7 +3369,7 @@ public:
         // Fill the output array with the second elements of the sorted vp
         FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(idx)
         {
-        	DIRECT_MULTIDIM_ELEM(idx, n) = vp[n].second;
+            DIRECT_MULTIDIM_ELEM(idx, n) = vp[n].second;
         }
     }
 
@@ -3577,13 +3577,13 @@ public:
         FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY_ptr(*this,n,ptr)
         if ((mask == NULL) || (DIRECT_MULTIDIM_ELEM(*mask,n) > 0) )
         {
-        	if (*ptr <= val + accuracy)
-        	{
-        		*ptr = 0;
-        	}
+            if (*ptr <= val + accuracy)
+            {
+                *ptr = 0;
+            }
             else
             {
-            	*ptr = 1;
+                *ptr = 1;
             }
         }
     }
@@ -3993,8 +3993,8 @@ public:
         unsigned long int n;
         FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY_ptr(*this, n, ptr)
         {
-        	in.read(reinterpret_cast< char* >(&val), sizeof(T));
-        	*ptr += val;
+            in.read(reinterpret_cast< char* >(&val), sizeof(T));
+            *ptr += val;
         }
 
         in.close();

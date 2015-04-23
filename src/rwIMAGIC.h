@@ -188,8 +188,8 @@ int  readIMAGIC(long int img_select)
     unsigned long   Ndim = _nDim, j = 0;
     if (dataflag<0)   // Don't read the individual header and the data if not necessary
     {
-    	delete header;
-    	return 0;
+        delete header;
+        return 0;
     }
 
     // View   view;
@@ -198,12 +198,12 @@ int  readIMAGIC(long int img_select)
    // Get the header information
     int error_fseek;
     if ( img_select > -1 )
-    	error_fseek = fseek( fhed, img_select * IMAGICSIZE, SEEK_SET );
+        error_fseek = fseek( fhed, img_select * IMAGICSIZE, SEEK_SET );
     else
-    	error_fseek = fseek( fhed, 0, SEEK_SET );
+        error_fseek = fseek( fhed, 0, SEEK_SET );
 
     if (error_fseek != 0)
-    	return -1;
+        return -1;
 
     delete header;
 

@@ -78,7 +78,7 @@ std::string unescape( const std::string& str )
         }
         else if (current_char == '\t')
         {
-        	temp += ' ';
+            temp += ' ';
         }
     }
 
@@ -148,7 +148,7 @@ double textToDouble(const char* str, int _errno, std::string errmsg)
     int ok;
 
     if (str == NULL)
-    	REPORT_ERROR( errmsg);
+        REPORT_ERROR( errmsg);
 
     ok = sscanf(str, "%lf", &retval);
 
@@ -166,7 +166,7 @@ float textToFloat(const char* str, int _errno, std::string errmsg)
     int ok;
 
     if (str == NULL)
-    	REPORT_ERROR( errmsg);
+        REPORT_ERROR( errmsg);
 
     ok = sscanf(str, "%f", &retval);
 
@@ -184,7 +184,7 @@ int textToInteger(const char* str, int _errno, std::string errmsg)
     int ok;
 
     if (str == NULL)
-    	REPORT_ERROR( errmsg);
+        REPORT_ERROR( errmsg);
 
     ok = sscanf(str, "%d", &retval);
 
@@ -202,7 +202,7 @@ long long textToLongLong(const char* str, int _errno, std::string errmsg)
     int ok;
 
     if (str == NULL)
-    	REPORT_ERROR( errmsg);
+        REPORT_ERROR( errmsg);
 
     ok = sscanf(str, "%lld", &retval);
 
@@ -322,7 +322,7 @@ std::string integerToString(int I, int _width, char fill_with)
     if (SGN(I) < 0)
         return static_cast< std::string >("-")  + aux;
     else
-    	return static_cast< std::string >(aux);
+        return static_cast< std::string >(aux);
 }
 
 int textToInt(const char* str, int _errno, std::string errmsg)
@@ -331,7 +331,7 @@ int textToInt(const char* str, int _errno, std::string errmsg)
     int ok;
 
     if (str == NULL)
-    	REPORT_ERROR( errmsg);
+        REPORT_ERROR( errmsg);
 
     ok = sscanf(str, "%c", &readval);
 
@@ -519,7 +519,7 @@ char *firstWord(char *str, int _errno, const std::string &errmsg)
 
     // Check that there is something
     if (token == NULL)
-    	REPORT_ERROR( errmsg);
+        REPORT_ERROR( errmsg);
 
     return token;
 }

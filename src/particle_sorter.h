@@ -44,81 +44,81 @@ class ParticleSorter
 {
 public:
 
-	// I/O Parser
-	IOParser parser;
+    // I/O Parser
+    IOParser parser;
 
-	// Verbosity
-	int verb;
+    // Verbosity
+    int verb;
 
-	// Input & Output rootname
-	FileName fn_in, fn_ref, fn_out;
+    // Input & Output rootname
+    FileName fn_in, fn_ref, fn_out;
 
-	// Input metadata
-	MetaDataTable MDin;
+    // Input metadata
+    MetaDataTable MDin;
 
-	// Pixel size (for low-pass filter and particle diameter)
-	double angpix;
+    // Pixel size (for low-pass filter and particle diameter)
+    double angpix;
 
-	// Particle diameter (in Angstroms)
-	double particle_diameter;
-	int particle_radius2;
+    // Particle diameter (in Angstroms)
+    double particle_diameter;
+    int particle_radius2;
 
-	// Low pass filetr cutoff (in Angstroms)
-	double lowpass;
+    // Low pass filetr cutoff (in Angstroms)
+    double lowpass;
 
-	// Original size of the reference images
-	int particle_size;
+    // Original size of the reference images
+    int particle_size;
 
-	// Dimension of the filtered image
-	int current_size;
+    // Dimension of the filtered image
+    int current_size;
 
-	// Minimum Z-value to count in the sorting
-	double min_z;
+    // Minimum Z-value to count in the sorting
+    double min_z;
 
-	// Vector with all original reference images
-	std::vector<MultidimArray<double> > Mrefs;
+    // Vector with all original reference images
+    std::vector<MultidimArray<double> > Mrefs;
 
-	// FTs of the reference images for feature calculation
-	std::vector<Projector > PPref;
+    // FTs of the reference images for feature calculation
+    std::vector<Projector > PPref;
 
-	// Feature values for all input images
-	MultidimArray<double> features;
+    // Feature values for all input images
+    MultidimArray<double> features;
 
-	// Is density in micrograph inverted wrt templates?
-	bool do_invert;
+    // Is density in micrograph inverted wrt templates?
+    bool do_invert;
 
-	// Correct the references for CTF effects?
-	bool do_ctf;
+    // Correct the references for CTF effects?
+    bool do_ctf;
 
-	// Keep the CTFs unchanged until the first peak?
-	bool intact_ctf_first_peak;
+    // Keep the CTFs unchanged until the first peak?
+    bool intact_ctf_first_peak;
 
 public:
-	// Read command line arguments
-	void read(int argc, char **argv);
+    // Read command line arguments
+    void read(int argc, char **argv);
 
-	// Print usage instructions
-	void usage();
+    // Print usage instructions
+    void usage();
 
-	// General function to decide what to do
-	void run();
+    // General function to decide what to do
+    void run();
 
-	// Initialise some general stuff after reading
-	void initialise();
+    // Initialise some general stuff after reading
+    void initialise();
 
-	void calculateFeaturesOneParticle(long int ipart);
+    void calculateFeaturesOneParticle(long int ipart);
 
 protected:
 
-	void normaliseFeatures();
+    void normaliseFeatures();
 
-	// Write out (for now in libsvm format)
-	void writeFeatures();
+    // Write out (for now in libsvm format)
+    void writeFeatures();
 
-	void calculateStatsOneImage(MultidimArray<double> &img,
-			double &mean, double &stddev, double &skew, double &kurt, double &quadrant_stddev);
+    void calculateStatsOneImage(MultidimArray<double> &img,
+            double &mean, double &stddev, double &skew, double &kurt, double &quadrant_stddev);
 
-	double rotationalSymmetryFourierTransform(MultidimArray<Complex > &Fimg);
+    double rotationalSymmetryFourierTransform(MultidimArray<Complex > &Fimg);
 
 };
 

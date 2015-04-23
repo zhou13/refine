@@ -28,10 +28,10 @@
 class ParticlePolisherMpi : public ParticlePolisher
 {
 private:
-	MpiNode *node;
+    MpiNode *node;
 
 public:
-	/** Destructor, calls MPI_Finalize */
+    /** Destructor, calls MPI_Finalize */
     ~ParticlePolisherMpi()
     {
         delete node;
@@ -42,22 +42,22 @@ public:
      */
     void read(int argc, char **argv);
 
-	// Parallelized fit the beam-induced translations for all average micrographs
-	void fitMovementsAllMicrographs();
+    // Parallelized fit the beam-induced translations for all average micrographs
+    void fitMovementsAllMicrographs();
 
-	// Parallelized calculation of B-factors for single-frame reconstructions
-	void calculateAllSingleFrameReconstructionsAndBfactors();
+    // Parallelized calculation of B-factors for single-frame reconstructions
+    void calculateAllSingleFrameReconstructionsAndBfactors();
 
-	// Parallelized movie frame re-alignment for all micrographs
-	void polishParticlesAllMicrographs();
+    // Parallelized movie frame re-alignment for all micrographs
+    void polishParticlesAllMicrographs();
 
-	// Calculate two half-reconstructions from shiny particles and calculate FSC-weighted average map, store that in refvol
-	void reconstructShinyParticlesAndFscWeight(int ipass);
+    // Calculate two half-reconstructions from shiny particles and calculate FSC-weighted average map, store that in refvol
+    void reconstructShinyParticlesAndFscWeight(int ipass);
 
-	// Parallelized optimisation of beamtilt for all micrographs
-	void optimiseBeamTilt();
+    // Parallelized optimisation of beamtilt for all micrographs
+    void optimiseBeamTilt();
 
-	// Parallelized run function
+    // Parallelized run function
     void run();
 
 };

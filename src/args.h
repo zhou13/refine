@@ -120,20 +120,20 @@ class IOParser
 {
 private:
 
-	std::vector<std::string> options;
-	std::vector<std::string> usages;
-	std::vector<bool>        optionals;
-	std::vector<std::string> defaultvalues;
-	std::vector<int>         section_numbers;
-	std::vector<std::string> section_names;
-	std::vector<std::string> error_messages;
-	std::vector<std::string> warning_messages;
+    std::vector<std::string> options;
+    std::vector<std::string> usages;
+    std::vector<bool>        optionals;
+    std::vector<std::string> defaultvalues;
+    std::vector<int>         section_numbers;
+    std::vector<std::string> section_names;
+    std::vector<std::string> error_messages;
+    std::vector<std::string> warning_messages;
 
-	int current_section;
+    int current_section;
 
-	// The original command line
-	int argc;
-	char** argv;
+    // The original command line
+    int argc;
+    char** argv;
 
 public:
 
@@ -170,7 +170,7 @@ public:
     /** Get the current section to this number */
     int getSection()
     {
-    	return current_section;
+        return current_section;
     }
 
     /** Add an option to the object list */
@@ -180,7 +180,7 @@ public:
     std::string getOption(std::string option, std::string usage, std::string defaultvalue = "NULL");
 
     /** Returns true if option was given and false if not, and adds option to the list if it did not yet exist */
-	bool checkOption(std::string option, std::string usage, std::string defaultvalue = "false");
+    bool checkOption(std::string option, std::string usage, std::string defaultvalue = "false");
 
     /** Checks the whole command line and reports an error if it contains an undefined option */
     bool commandLineContainsUndefinedOption();

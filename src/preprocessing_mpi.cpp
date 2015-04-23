@@ -33,7 +33,7 @@ void PreprocessingMpi::read(int argc, char **argv)
     // Possibly also read parallelisation-dependent variables here
 
     // Print out MPI info
-	printMpiNodesMachineNames(*node);
+    printMpiNodesMachineNames(*node);
 
 
 }
@@ -42,41 +42,41 @@ void PreprocessingMpi::read(int argc, char **argv)
 void PreprocessingMpi::runExtractParticles()
 {
 
-	// Each node does part of the work
-	long int my_first_coord, my_last_coord, my_nr_coords;
-	divide_equally(fn_coords.size(), node->size, node->rank, my_first_coord, my_last_coord);
-	my_nr_coords = my_last_coord - my_first_coord + 1;
+    // Each node does part of the work
+    long int my_first_coord, my_last_coord, my_nr_coords;
+    divide_equally(fn_coords.size(), node->size, node->rank, my_first_coord, my_last_coord);
+    my_nr_coords = my_last_coord - my_first_coord + 1;
 
-	int barstep;
-	if (verb > 0)
-	{
-		std::cout << " Extracting particles from the micrographs ..." << std::endl;
-		init_progress_bar(my_nr_coords);
-		barstep = XMIPP_MAX(1, my_nr_coords / 60);
-
-		// Make a Particles directory
-		system("mkdir -p Particles");
-	}
-
-	FileName fn_olddir = "";
-	for (long int ipos = my_first_coord; ipos <= my_last_coord; ipos++)
+    int barstep;
+    if (verb > 0)
     {
-		FileName fn_dir = "Particles/" + fn_coords[ipos].beforeLastOf("/");
-		if (fn_dir != fn_olddir)
-		{
-			// Make a Particles directory
-			system(("mkdir -p " + fn_dir).c_str());
-			fn_olddir = fn_dir;
-		}
+        std::cout << " Extracting particles from the micrographs ..." << std::endl;
+        init_progress_bar(my_nr_coords);
+        barstep = XMIPP_MAX(1, my_nr_coords / 60);
 
-		if (verb > 0 && ipos % barstep == 0)
-			progress_bar(ipos);
+        // Make a Particles directory
+        system("mkdir -p Particles");
+    }
 
-    	extractParticlesFromFieldOfView(fn_coords[ipos]);
-	}
+    FileName fn_olddir = "";
+    for (long int ipos = my_first_coord; ipos <= my_last_coord; ipos++)
+    {
+        FileName fn_dir = "Particles/" + fn_coords[ipos].beforeLastOf("/");
+        if (fn_dir != fn_olddir)
+        {
+            // Make a Particles directory
+            system(("mkdir -p " + fn_dir).c_str());
+            fn_olddir = fn_dir;
+        }
 
-	if (verb > 0)
-		progress_bar(my_nr_coords);
+        if (verb > 0 && ipos % barstep == 0)
+            progress_bar(ipos);
+
+        extractParticlesFromFieldOfView(fn_coords[ipos]);
+    }
+
+    if (verb > 0)
+        progress_bar(my_nr_coords);
 
 }
 
@@ -85,23 +85,23 @@ void PreprocessingMpi::runExtractParticles()
 void PreprocessingMpi::run()
 {
 
-	// Extract and operate on particles in parallel
-	if (do_extract)
-	{
-		runExtractParticles();
+    // Extract and operate on particles in parallel
+    if (do_extract)
+    {
+        runExtractParticles();
 
-		// Wait until all nodes have finished to make final star file
-		MPI_Barrier(MPI_COMM_WORLD);
-	}
+        // Wait until all nodes have finished to make final star file
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
 
-	if (do_join_starfile && node->isMaster())
-		Preprocessing::joinAllStarFiles();
+    if (do_join_starfile && node->isMaster())
+        Preprocessing::joinAllStarFiles();
 
-	// The following has not been parallelised....
-	if (fn_operate_in != "" && node->isMaster())
-		Preprocessing::runOperateOnInputFile(fn_operate_in);
+    // The following has not been parallelised....
+    if (fn_operate_in != "" && node->isMaster())
+        Preprocessing::runOperateOnInputFile(fn_operate_in);
 
-	if (verb > 0)
-		std::cout << " Done!" <<std::endl;
+    if (verb > 0)
+        std::cout << " Done!" <<std::endl;
 
 }

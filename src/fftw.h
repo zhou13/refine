@@ -78,15 +78,15 @@
  */
 #define FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(V) \
     for (long int k = 0, kp = 0; k<ZSIZE(V); k++, kp = (k < XSIZE(V)) ? k : k - ZSIZE(V)) \
-    	for (long int i = 0, ip = 0 ; i<YSIZE(V); i++, ip = (i < XSIZE(V)) ? i : i - YSIZE(V)) \
-    		for (long int j = 0, jp = 0; j<XSIZE(V); j++, jp = j)
+        for (long int i = 0, ip = 0 ; i<YSIZE(V); i++, ip = (i < XSIZE(V)) ? i : i - YSIZE(V)) \
+            for (long int j = 0, jp = 0; j<XSIZE(V); j++, jp = j)
 
 /** For all direct elements in the complex array in FFTW format.
  *  The same as above, but now only for 2D images (this saves some time as k is not sampled
  */
 #define FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM2D(V) \
-	for (long int i = 0, ip = 0 ; i<YSIZE(V); i++, ip = (i < XSIZE(V)) ? i : i - YSIZE(V)) \
-		for (long int j = 0, jp = 0; j<XSIZE(V); j++, jp = j)
+    for (long int i = 0, ip = 0 ; i<YSIZE(V); i++, ip = (i < XSIZE(V)) ? i : i - YSIZE(V)) \
+        for (long int j = 0, jp = 0; j<XSIZE(V); j++, jp = j)
 
 /** FFTW volume element: Logical access.
  *
@@ -335,7 +335,7 @@ public:
 
     /** This calls fftw_cleanup.
      * NOTE!! When using multiple threads, only ONE thread can call this function, as it cleans up things that are shared among all threads...
- 	 *  Therefore, this cleanup is something that needs to be done manually...
+     *  Therefore, this cleanup is something that needs to be done manually...
     */
     void cleanup();
 
@@ -571,8 +571,8 @@ void CenterFFT(MultidimArray< T >& v, bool forward)
     }
     else
     {
-    	v.printShape();
-    	REPORT_ERROR("CenterFFT ERROR: Dimension should be 1, 2 or 3");
+        v.printShape();
+        REPORT_ERROR("CenterFFT ERROR: Dimension should be 1, 2 or 3");
     }
 }
 
@@ -581,136 +581,136 @@ void CenterFFT(MultidimArray< T >& v, bool forward)
 // Window an FFTW-centered Fourier-transform to a given size
 template<class T>
 void windowFourierTransform(MultidimArray<T > &in,
-			  			    MultidimArray<T > &out,
-			  			    long int newdim)
+                            MultidimArray<T > &out,
+                            long int newdim)
 {
-	// Check size of the input array
-	if (YSIZE(in) > 1 && YSIZE(in)/2 + 1 != XSIZE(in))
-		REPORT_ERROR("windowFourierTransform ERROR: the Fourier transform should be of an image with equal sizes in all dimensions!");
-	long int newhdim = newdim/2 + 1;
+    // Check size of the input array
+    if (YSIZE(in) > 1 && YSIZE(in)/2 + 1 != XSIZE(in))
+        REPORT_ERROR("windowFourierTransform ERROR: the Fourier transform should be of an image with equal sizes in all dimensions!");
+    long int newhdim = newdim/2 + 1;
 
-	// If same size, just return input
-	if (newhdim == XSIZE(in))
-	{
-		out = in;
-		return;
-	}
-
-	// Otherwise apply a windowing operation
-	// Initialise output array
-	switch (in.getDim())
-	{
-	case 1:
-		out.initZeros(newhdim);
-		break;
-	case 2:
-		out.initZeros(newdim, newhdim);
-		break;
-	case 3:
-		out.initZeros(newdim, newdim, newhdim);
-		break;
-	default:
-    	REPORT_ERROR("windowFourierTransform ERROR: dimension should be 1, 2 or 3!");
+    // If same size, just return input
+    if (newhdim == XSIZE(in))
+    {
+        out = in;
+        return;
     }
-	if (newhdim > XSIZE(in))
-	{
-		long int max_r2 = (XSIZE(in) -1) * (XSIZE(in) - 1);
-		FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(in)
-		{
-			// Make sure windowed FT has nothing in the corners, otherwise we end up with an asymmetric FT!
-			if (kp*kp + ip*ip + jp*jp <= max_r2)
-				FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
-		}
-	}
-	else
-	{
-		FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(out)
-		{
-			FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
-		}
-	}
+
+    // Otherwise apply a windowing operation
+    // Initialise output array
+    switch (in.getDim())
+    {
+    case 1:
+        out.initZeros(newhdim);
+        break;
+    case 2:
+        out.initZeros(newdim, newhdim);
+        break;
+    case 3:
+        out.initZeros(newdim, newdim, newhdim);
+        break;
+    default:
+        REPORT_ERROR("windowFourierTransform ERROR: dimension should be 1, 2 or 3!");
+    }
+    if (newhdim > XSIZE(in))
+    {
+        long int max_r2 = (XSIZE(in) -1) * (XSIZE(in) - 1);
+        FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(in)
+        {
+            // Make sure windowed FT has nothing in the corners, otherwise we end up with an asymmetric FT!
+            if (kp*kp + ip*ip + jp*jp <= max_r2)
+                FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
+        }
+    }
+    else
+    {
+        FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM(out)
+        {
+            FFTW_ELEM(out, kp, ip, jp) = FFTW_ELEM(in, kp, ip, jp);
+        }
+    }
 }
 
 // A resize operation in Fourier-space (i.e. changing the sampling of the Fourier Transform) by windowing in real-space
 // If recenter=true, the real-space array will be recentered to have its origin at the origin of the FT
 template<class T>
 void resizeFourierTransform(MultidimArray<T > &in,
-			  			    MultidimArray<T > &out,
-			  			    long int newdim, bool do_recenter=true)
+                            MultidimArray<T > &out,
+                            long int newdim, bool do_recenter=true)
 {
-	// Check size of the input array
-	if (YSIZE(in) > 1 && YSIZE(in)/2 + 1 != XSIZE(in))
-		REPORT_ERROR("windowFourierTransform ERROR: the Fourier transform should be of an image with equal sizes in all dimensions!");
-	long int newhdim = newdim/2 + 1;
-	long int olddim = 2* (XSIZE(in) - 1);
+    // Check size of the input array
+    if (YSIZE(in) > 1 && YSIZE(in)/2 + 1 != XSIZE(in))
+        REPORT_ERROR("windowFourierTransform ERROR: the Fourier transform should be of an image with equal sizes in all dimensions!");
+    long int newhdim = newdim/2 + 1;
+    long int olddim = 2* (XSIZE(in) - 1);
 
-	// If same size, just return input
-	if (newhdim == XSIZE(in))
-	{
-		out = in;
-		return;
-	}
-
-	// Otherwise apply a windowing operation
-	MultidimArray<Complex > Fin;
-	MultidimArray<double> Min;
-	FourierTransformer transformer;
-	long int x0, y0, z0, xF, yF, zF;
-	x0 = y0 = z0 = FIRST_XMIPP_INDEX(newdim);
-	xF = yF = zF = LAST_XMIPP_INDEX(newdim);
-
-	// Initialise output array
-	switch (in.getDim())
-	{
-	case 1:
-		Min.resize(olddim);
-		y0=yF=z0=zF=0;
-		break;
-	case 2:
-		Min.resize(olddim, olddim);
-		z0=zF=0;
-		break;
-	case 3:
-		Min.resize(olddim, olddim, olddim);
-		break;
-	default:
-    	REPORT_ERROR("resizeFourierTransform ERROR: dimension should be 1, 2 or 3!");
+    // If same size, just return input
+    if (newhdim == XSIZE(in))
+    {
+        out = in;
+        return;
     }
 
-	// This is to handle double-valued input arrays
-	Fin.resize(ZSIZE(in), YSIZE(in), XSIZE(in));
-	FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(in)
-	{
-		DIRECT_MULTIDIM_ELEM(Fin, n) = DIRECT_MULTIDIM_ELEM(in, n);
-	}
-	transformer.inverseFourierTransform(Fin, Min);
-	Min.setXmippOrigin();
-	if (do_recenter)
-		CenterFFT(Min, false);
+    // Otherwise apply a windowing operation
+    MultidimArray<Complex > Fin;
+    MultidimArray<double> Min;
+    FourierTransformer transformer;
+    long int x0, y0, z0, xF, yF, zF;
+    x0 = y0 = z0 = FIRST_XMIPP_INDEX(newdim);
+    xF = yF = zF = LAST_XMIPP_INDEX(newdim);
 
-	// Now do the actual windowing in real-space
-	Min.window(z0, y0, x0, zF, yF, xF);
-	Min.setXmippOrigin();
+    // Initialise output array
+    switch (in.getDim())
+    {
+    case 1:
+        Min.resize(olddim);
+        y0=yF=z0=zF=0;
+        break;
+    case 2:
+        Min.resize(olddim, olddim);
+        z0=zF=0;
+        break;
+    case 3:
+        Min.resize(olddim, olddim, olddim);
+        break;
+    default:
+        REPORT_ERROR("resizeFourierTransform ERROR: dimension should be 1, 2 or 3!");
+    }
 
-	// If upsizing: mask the corners to prevent aliasing artefacts
-	if (newdim > olddim)
-	{
-		FOR_ALL_ELEMENTS_IN_ARRAY3D(Min)
-		{
-			if (k*k + i*i + j*j > olddim*olddim/4)
-			{
-				A3D_ELEM(Min, k, i, j) = 0.;
-			}
-		}
-	}
+    // This is to handle double-valued input arrays
+    Fin.resize(ZSIZE(in), YSIZE(in), XSIZE(in));
+    FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(in)
+    {
+        DIRECT_MULTIDIM_ELEM(Fin, n) = DIRECT_MULTIDIM_ELEM(in, n);
+    }
+    transformer.inverseFourierTransform(Fin, Min);
+    Min.setXmippOrigin();
+    if (do_recenter)
+        CenterFFT(Min, false);
 
-	// Recenter FFT back again
-	if (do_recenter)
-		CenterFFT(Min, true);
+    // Now do the actual windowing in real-space
+    Min.window(z0, y0, x0, zF, yF, xF);
+    Min.setXmippOrigin();
 
-	// And do the inverse Fourier transform
-	transformer.clear();
-	transformer.FourierTransform(Min, out);
+    // If upsizing: mask the corners to prevent aliasing artefacts
+    if (newdim > olddim)
+    {
+        FOR_ALL_ELEMENTS_IN_ARRAY3D(Min)
+        {
+            if (k*k + i*i + j*j > olddim*olddim/4)
+            {
+                A3D_ELEM(Min, k, i, j) = 0.;
+            }
+        }
+    }
+
+    // Recenter FFT back again
+    if (do_recenter)
+        CenterFFT(Min, true);
+
+    // And do the inverse Fourier transform
+    transformer.clear();
+    transformer.FourierTransform(Min, out);
 }
 
 /** Fourier-Ring-Correlation between two multidimArrays using FFT
@@ -718,16 +718,16 @@ void resizeFourierTransform(MultidimArray<T > &in,
  * Simpler I/O than above.
  */
 void getFSC(MultidimArray< Complex > &FT1,
-		    MultidimArray< Complex > &FT2,
-		    MultidimArray< double > &fsc);
+            MultidimArray< Complex > &FT2,
+            MultidimArray< double > &fsc);
 
 /** Fourier-Ring-Correlation between two multidimArrays using FFT
  * @ingroup FourierOperations
  * Simpler I/O than above.
  */
 void getFSC(MultidimArray< double > & m1,
-		    MultidimArray< double > & m2,
-		    MultidimArray< double > &fsc);
+            MultidimArray< double > & m2,
+            MultidimArray< double > &fsc);
 
 /** Scale matrix using Fourier transform
  * @ingroup FourierOperations
@@ -740,17 +740,17 @@ void getFSC(MultidimArray< double > & m1,
 // if oridim is in pixels, xshift, yshift and zshift should be in pixels as well!
 // or both can be in Angstroms
 void shiftImageInFourierTransform(MultidimArray<Complex > &in,
-								  MultidimArray<Complex > &out,
-								  TabSine &tab_sin, TabCosine &tab_cos,
-								  double oridim, Matrix1D<double> shift);
+                                  MultidimArray<Complex > &out,
+                                  TabSine &tab_sin, TabCosine &tab_cos,
+                                  double oridim, Matrix1D<double> shift);
 
 // Shift an image through phase-shifts in its Fourier Transform (without tabulated sine and cosine)
 // Note that in and out may be the same array, in that case in is overwritten with the result
 // if oridim is in pixels, xshift, yshift and zshift should be in pixels as well!
 // or both can be in Angstroms
 void shiftImageInFourierTransform(MultidimArray<Complex > &in,
-						          MultidimArray<Complex > &out,
-								  double oridim, Matrix1D<double> shift);
+                                  MultidimArray<Complex > &out,
+                                  double oridim, Matrix1D<double> shift);
 
 #define POWER_SPECTRUM 0
 #define AMPLITUDE_SPECTRUM 1
@@ -800,9 +800,9 @@ void adaptSpectrum(MultidimArray<double> &Min,
 
 /** Kullback-Leibner divergence */
 double getKullbackLeibnerDivergence(MultidimArray<Complex > &Fimg,
-		MultidimArray<Complex > &Fref, MultidimArray<double> &sigma2,
-		MultidimArray<double> &p_i, MultidimArray<double> &q_i,
-		int highshell = -1, int lowshell = -1);
+        MultidimArray<Complex > &Fref, MultidimArray<double> &sigma2,
+        MultidimArray<double> &p_i, MultidimArray<double> &q_i,
+        int highshell = -1, int lowshell = -1);
 
 
 // Resize a map by windowing it's Fourier Transform
@@ -821,7 +821,7 @@ void applyBFactorToMap(MultidimArray<double > &img, double bfactor, double angpi
 
 // Low-pass filter a map (given it's Fourier transform)
 void lowPassFilterMap(MultidimArray<Complex > &FT, int ori_size,
-		double low_pass, double angpix, int filter_edge_width = 2, bool do_highpass_instead = false);
+        double low_pass, double angpix, int filter_edge_width = 2, bool do_highpass_instead = false);
 
 // Low-pass and high-pass filter a map (given it's real-space array)
 void lowPassFilterMap(MultidimArray<double > &img, double low_pass, double angpix, int filter_edge_width = 2);
@@ -833,9 +833,9 @@ void highPassFilterMap(MultidimArray<double > &img, double low_pass, double angp
  *  Phase shifts caused by the beamtilt will be calculated and applied to Fimg
  */
 void selfApplyBeamTilt(MultidimArray<Complex > &Fimg, double beamtilt_x, double beamtilt_y,
-		double wavelength, double Cs, double angpix, int ori_size);
+        double wavelength, double Cs, double angpix, int ori_size);
 
 void applyBeamTilt(const MultidimArray<Complex > &Fin, MultidimArray<Complex > &Fout, double beamtilt_x, double beamtilt_y,
-		double wavelength, double Cs, double angpix, int ori_size);
+        double wavelength, double Cs, double angpix, int ori_size);
 
 #endif

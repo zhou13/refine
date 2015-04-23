@@ -29,16 +29,18 @@ class TabFunction
 {
 
 protected:
-	MultidimArray<double> tabulatedValues;
-	double  sampling;
-public:
-	// Empty constructor
-	TabFunction() {}
+    MultidimArray<double> tabulatedValues;
+    double sampling;
+    double inv_sampling;
 
-	// Destructor
+public:
+    // Empty constructor
+    TabFunction() {}
+
+    // Destructor
     virtual ~TabFunction()
     {
-    	tabulatedValues.clear();
+        tabulatedValues.clear();
     }
 
     /** Copy constructor
@@ -48,11 +50,11 @@ public:
      */
     TabFunction(const TabFunction& op)
     {
-    	tabulatedValues.clear();
-    	*this = op;
+        tabulatedValues.clear();
+        *this = op;
     }
 
-	/** Assignment.
+    /** Assignment.
      *
      * You can build as complex assignment expressions as you like. Multiple
      * assignment is allowed.
@@ -61,9 +63,9 @@ public:
     {
         if (&op != this)
         {
-         	// Projector stuff (is this necessary in C++?)
-        	tabulatedValues = op.tabulatedValues;
-        	sampling = op.sampling;
+            // Projector stuff (is this necessary in C++?)
+            tabulatedValues = op.tabulatedValues;
+            sampling = op.sampling;
         }
         return *this;
     }
@@ -74,56 +76,88 @@ public:
 class TabSine : public TabFunction
 {
 public:
-	// Empty constructor
-	TabSine() {}
+    const int NUM_ELEM = 4096;
 
-	// Constructor (with parameters)
-	void initialise(const int _nr_elem = 5000);
+    // Empty constructor
+    TabSine() {}
 
-	//Pre-calculate table values
-	void fillTable(const int _nr_elem = 5000);
+    // Constructor (with parameters)
+    void initialise() {
+        sampling = 2 * PI / (double) NUM_ELEM;
+        inv_sampling = 1 / sampling;
+        TabSine::fillTable();
+    }
 
-	// Value access
-	double operator()(double val) const;
+    //Pre-calculate table values
+    void fillTable() {
+        tabulatedValues.resize(NUM_ELEM);
+        for (int i = 0; i < NUM_ELEM; i++)
+        {
+            double xx = (double) i * sampling;
+            tabulatedValues(i) = sin(xx);
+        }
+    }
 
+    // Value access
+    double operator()(double val) const
+    {
+        int idx = (int)(ABS(val) * inv_sampling);
+        double retval = DIRECT_A1D_ELEM(tabulatedValues, idx % NUM_ELEM);
+        return (val < 0 ) ? -retval : retval;
+    }
 };
 
 class TabCosine : public TabFunction
 {
 public:
-	// Empty constructor
-	TabCosine() {}
+    const int NUM_ELEM = 4096;
 
-	void initialise(const int _nr_elem = 5000);
+    // Empty constructor
+    TabCosine() {}
 
-	//Pre-calculate table values
-	void fillTable(const int _nr_elem = 5000);
+    void initialise() {
+        sampling = 2 * PI / (double) NUM_ELEM;
+        inv_sampling = 1 / sampling;
+        TabCosine::fillTable();
+    }
 
-	// Value access
-	double operator()(double val) const;
+    //Pre-calculate table values
+    void fillTable() {
+        tabulatedValues.resize(NUM_ELEM);
+        for (int i = 0; i < NUM_ELEM; i++)
+        {
+            double xx = (double) i * sampling;
+            tabulatedValues(i) = cos(xx);
+        }
+    }
 
+    // Value access
+    double operator()(double val) const
+    {
+        int idx = (int)(ABS(val) * inv_sampling);
+        return DIRECT_A1D_ELEM(tabulatedValues, idx % NUM_ELEM);
+    }
 };
 
 class TabBlob : public TabFunction
 {
-
 private:
-	double radius;
-	double alpha;
-	int order;
+    double radius;
+    double alpha;
+    int order;
 
 public:
-	// Empty constructor
-	TabBlob() {}
+    // Empty constructor
+    TabBlob() {}
 
-	// Constructor (with parameters)
-	void initialise(double _radius, double _alpha, int _order, const int _nr_elem = 10000);
+    // Constructor (with parameters)
+    void initialise(double _radius, double _alpha, int _order, const int _nr_elem = 10000);
 
-	//Pre-calculate table values
-	void fillTable(const int _nr_elem = 5000);
+    //Pre-calculate table values
+    void fillTable(const int _nr_elem = 5000);
 
-	// Value access
-	double operator()(double val) const;
+    // Value access
+    double operator()(double val) const;
 
 };
 
@@ -131,22 +165,22 @@ class TabFtBlob : public TabFunction
 {
 
 private:
-	double radius;
-	double alpha;
-	int order;
+    double radius;
+    double alpha;
+    int order;
 
 public:
-	// Empty constructor
-	TabFtBlob() {}
+    // Empty constructor
+    TabFtBlob() {}
 
-	 // Constructor (with parameters)
-	void initialise(double _radius, double _alpha, int _order, const int _nr_elem = 10000);
+    // Constructor (with parameters)
+    void initialise(double _radius, double _alpha, int _order, const int _nr_elem = 10000);
 
-	//Pre-calculate table values
-	void fillTable(const int _nr_elem = 5000);
+    //Pre-calculate table values
+    void fillTable(const int _nr_elem = 5000);
 
-	// Value access
-	double operator()(double val) const;
+    // Value access
+    double operator()(double val) const;
 
 };
 

@@ -25,13 +25,13 @@
 class Complex
 {
 
-	public:
+    public:
 
-	double real;
-	double imag;
+    double real;
+    double imag;
 
     // Constructor
-	Complex(double _r = 0.0, double _i = 0.0);
+    Complex(double _r = 0.0, double _i = 0.0);
 
     Complex operator+(Complex &op);
     void operator+=(Complex &op);

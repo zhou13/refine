@@ -119,7 +119,7 @@ void translation2DMatrix(const Matrix1D< double > &v, Matrix2D< double > &m);
  * @endcode
  */
 void rotation3DMatrix(double ang, char axis, Matrix2D< double > &m,
-		bool homogeneous=true);
+        bool homogeneous=true);
 
 /** Creates a rotational matrix (4x4) for volumes around any axis
  * @ingroup GeometricalTransformations
@@ -133,7 +133,7 @@ void rotation3DMatrix(double ang, char axis, Matrix2D< double > &m,
  * @endcode
  */
 void rotation3DMatrix(double ang, const Matrix1D< double >& axis, Matrix2D< double > &m,
-		bool homogeneous=true);
+        bool homogeneous=true);
 
 /** Matrix which transforms the given axis into Z
  * @ingroup GeometricalTransformations
@@ -172,7 +172,7 @@ void translation3DMatrix(const Matrix1D< double >& v, Matrix2D< double > &m);
  * that, XX(sc)=scale for X axis, YY(sc)=...
  */
 void scale3DMatrix(const Matrix1D< double >& sc, Matrix2D< double > &m,
-		bool homogeneous=true);
+        bool homogeneous=true);
 
 /** Applies a geometrical transformation.
  * @ingroup GeometricalTransformations
@@ -442,7 +442,7 @@ void applyGeometry(const MultidimArray<T>& V1,
 
                 } // if interp
                 else
-                	dAij(V2, i, j) = outside;
+                    dAij(V2, i, j) = outside;
 
                 // Compute new point inside input image
                 xp += Aref(0, 0);

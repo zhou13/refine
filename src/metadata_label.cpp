@@ -58,32 +58,32 @@ void EMDL::addLabel(EMDLabel label, EMDLabelType type, std::string name, std::st
 
 void EMDL::printDefinitions(std::ostream& out)
 {
-	out << "+++ RELION MetaDataLabel (EMDL) definitions: +++" <<std::endl;
-	 std::map<std::string, std::string>::const_iterator strIt;
-	for (strIt = definitions.begin(); strIt != definitions.end(); strIt++)
-	{
-		out << std::setw(30) <<strIt->first;
-		if (EMDL::isInt(names[strIt->first]))
-			out << " (int)    ";
-		else if (EMDL::isLong(names[strIt->first]))
-			out << " (long)   ";
-		else if (EMDL::isBool(names[strIt->first]))
-			out << " (bool)   ";
-		else if (EMDL::isDouble(names[strIt->first]))
-			out << " (double) ";
-		else if (EMDL::isString(names[strIt->first]))
-			out << " (string) ";
-		else
-			REPORT_ERROR("EMDL::printDefinitions: unrecognised type");
-		out << ": " << strIt->second <<std::endl;
-	}
+    out << "+++ RELION MetaDataLabel (EMDL) definitions: +++" <<std::endl;
+     std::map<std::string, std::string>::const_iterator strIt;
+    for (strIt = definitions.begin(); strIt != definitions.end(); strIt++)
+    {
+        out << std::setw(30) <<strIt->first;
+        if (EMDL::isInt(names[strIt->first]))
+            out << " (int)    ";
+        else if (EMDL::isLong(names[strIt->first]))
+            out << " (long)   ";
+        else if (EMDL::isBool(names[strIt->first]))
+            out << " (bool)   ";
+        else if (EMDL::isDouble(names[strIt->first]))
+            out << " (double) ";
+        else if (EMDL::isString(names[strIt->first]))
+            out << " (string) ";
+        else
+            REPORT_ERROR("EMDL::printDefinitions: unrecognised type");
+        out << ": " << strIt->second <<std::endl;
+    }
 }
 
 
 
 EMDLabel  EMDL::str2Label(const std::string &labelName)
 {
-	if (names.find(labelName) == names.end())
+    if (names.find(labelName) == names.end())
         return EMDL_UNDEFINED;
     return names[labelName];
 }//close function str2Label

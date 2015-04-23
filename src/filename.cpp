@@ -341,7 +341,7 @@ bool FileName::isStarFile() const
     }
     else
     {
-    	return false;
+        return false;
     }
 }
 
@@ -413,15 +413,15 @@ void FileName::copyFile(const FileName & target) const
 
 int FileName::globFiles(std::vector<FileName> &files) const
 {
-	glob_t glob_result;
-	glob((*this).c_str(), GLOB_TILDE, NULL, &glob_result);
-	files.clear();
-	for(unsigned  int  i = 0; i < glob_result.gl_pathc; ++i)
-	{
-		files.push_back(std::string(glob_result.gl_pathv[i]));
-	}
-	globfree(&glob_result);
-	return files.size();
+    glob_t glob_result;
+    glob((*this).c_str(), GLOB_TILDE, NULL, &glob_result);
+    files.clear();
+    for(unsigned  int  i = 0; i < glob_result.gl_pathc; ++i)
+    {
+        files.push_back(std::string(glob_result.gl_pathv[i]));
+    }
+    globfree(&glob_result);
+    return files.size();
 }
 
 bool exists(const FileName &fn)

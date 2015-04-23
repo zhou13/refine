@@ -75,8 +75,8 @@ void Euler_angles2matrix(double a, double b, double g, Matrix2D< double >& A,
  * Resizes v if needed
  */
 void Euler_angles2direction(double alpha,
-						 double beta,
-						 Matrix1D< double >& v);
+                         double beta,
+                         Matrix1D< double >& v);
 
 /** Euler direction2angles
  *

@@ -69,7 +69,7 @@ int SymList::read_sym_file(FileName fn_sym)
         //check if reserved word and return group and order
         if (isSymmetryGroup(fn_sym, pgGroup, pgOrder))
         {
-        	fill_symmetry_class(fn_sym, pgGroup, pgOrder, fileContent);
+            fill_symmetry_class(fn_sym, pgGroup, pgOrder, fileContent);
         }
         else
             REPORT_ERROR((std::string)"SymList::read_sym_file:Can't open file: "
@@ -80,8 +80,8 @@ int SymList::read_sym_file(FileName fn_sym)
         while (fgets(line, 79, fpoii) != NULL)
         {
             if (line[0] == ';' || line[0] == '#' || line[0] == '\0')
-            	continue;
-			fileContent.push_back(line);
+                continue;
+            fileContent.push_back(line);
         }
         fclose(fpoii);
     }
@@ -96,7 +96,7 @@ int SymList::read_sym_file(FileName fn_sym)
 
     for (int n=0; n<fileContent.size(); n++)
     {
-    	strcpy(line,fileContent[n].c_str());
+        strcpy(line,fileContent[n].c_str());
         auxstr = firstToken(line);
         if (auxstr == NULL)
         {
@@ -296,7 +296,7 @@ void SymList::compute_subgroup()
         found = false;
         for (int l = 0; l < SymsNo(); l++)
         {
-        	get_matrices(l, L1, R1);
+            get_matrices(l, L1, R1);
             if (newL.equal(L1) && newR.equal(R1))
             {
                 found = true;
@@ -607,49 +607,49 @@ void SymList::fill_symmetry_class(const FileName symmetry, int pgGroup, int pgOr
    std::vector<std::string> &fileContent)
 {
 
-	fileContent.clear();
-	if (pgGroup == pg_CN)
+    fileContent.clear();
+    if (pgGroup == pg_CN)
     {
-    	fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
+        fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
     }
     else if (pgGroup == pg_CI)
     {
-    	fileContent.push_back("inversion ");
+        fileContent.push_back("inversion ");
     }
     else if (pgGroup == pg_CS)
     {
-    	fileContent.push_back("mirror_plane 0 0 1");
+        fileContent.push_back("mirror_plane 0 0 1");
     }
     else if (pgGroup == pg_CNV)
     {
-    	fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
-    	fileContent.push_back("mirror_plane 0 1 0");
+        fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
+        fileContent.push_back("mirror_plane 0 1 0");
     }
     else if (pgGroup == pg_CNH)
     {
-    	fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
-    	fileContent.push_back("mirror_plane 0 0 1");
+        fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
+        fileContent.push_back("mirror_plane 0 0 1");
     }
     else if (pgGroup == pg_SN)
     {
         int order = pgOrder / 2;
-		if(2*order != pgOrder)
-		{
-				std::cerr << "ERROR: order for SN group must be even" << std::endl;
-				exit(0);
-		}
+        if(2*order != pgOrder)
+        {
+                std::cerr << "ERROR: order for SN group must be even" << std::endl;
+                exit(0);
+        }
         fileContent.push_back("rot_axis " + integerToString(order) + " 0 0 1");
         fileContent.push_back("inversion ");
     }
     else if (pgGroup == pg_DN)
     {
 
-    	fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
-    	fileContent.push_back("rot_axis 2 1 0 0");
+        fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
+        fileContent.push_back("rot_axis 2 1 0 0");
     }
     else if (pgGroup == pg_DNV)
     {
-    	fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
+        fileContent.push_back("rot_axis " + integerToString(pgOrder) + " 0 0 1");
         fileContent.push_back("rot_axis 2 1 0 0");
         fileContent.push_back("mirror_plane 1 0 0");
     }
@@ -695,7 +695,7 @@ void SymList::fill_symmetry_class(const FileName symmetry, int pgGroup, int pgOr
     }
     else if (pgGroup == pg_I1)
     {
-        fileContent.push_back("rot_axis 2  1  	   0	       0");
+        fileContent.push_back("rot_axis 2  1       0           0");
         fileContent.push_back("rot_axis 5 0.85065080702670 0 -0.5257311142635");
         fileContent.push_back("rot_axis 3 0.9341723640 0.3568220765 0");
     }
@@ -725,7 +725,7 @@ void SymList::fill_symmetry_class(const FileName symmetry, int pgGroup, int pgOr
     }
     else if (pgGroup == pg_I1H)
     {
-        fileContent.push_back("rot_axis 2  1  	   0	       0");
+        fileContent.push_back("rot_axis 2  1       0           0");
         fileContent.push_back("rot_axis 5 0.85065080702670 0 -0.5257311142635");
         fileContent.push_back("rot_axis 3 0.9341723640 0.3568220765 0");
         fileContent.push_back("mirror_plane 0 0 -1");
@@ -758,26 +758,26 @@ void SymList::fill_symmetry_class(const FileName symmetry, int pgGroup, int pgOr
 //#define DEBUG5
 #ifdef DEBUG5
     for (int n=0; n<fileContent.size(); n++)
-    	std::cerr << fileContent[n] << std::endl;
-	std::cerr << "fileContent.size()" << fileContent.size() << std::endl;
+        std::cerr << fileContent[n] << std::endl;
+    std::cerr << "fileContent.size()" << fileContent.size() << std::endl;
 #endif
 #undef DEBUG5
 }
 
 void SymList::writeDefinition(std::ostream &outstream, FileName fn_sym)
 {
-	read_sym_file(fn_sym);
-	Matrix2D<double> L(3,3), R(3,3);
-	outstream << " ++++ Using symmetry group " << fn_sym << ", with the following " << SymsNo()+1 << " transformation matrices:"<< std::endl;
+    read_sym_file(fn_sym);
+    Matrix2D<double> L(3,3), R(3,3);
+    outstream << " ++++ Using symmetry group " << fn_sym << ", with the following " << SymsNo()+1 << " transformation matrices:"<< std::endl;
     R.initIdentity();
     outstream << " R(1)= " << R;
-	for (int isym = 0; isym < SymsNo(); isym++)
+    for (int isym = 0; isym < SymsNo(); isym++)
     {
         get_matrices(isym, L, R);
         R.resize(3, 3);
         L.resize(3, 3);
         if (!L.isIdentity())
-        	outstream << " L("<< isym+2<<")= "<<L;
+            outstream << " L("<< isym+2<<")= "<<L;
         outstream << " R("<< isym+2<<")= "<<R;
     }
 
@@ -895,27 +895,27 @@ double SymList::non_redundant_ewald_sphere(int pgGroup, int pgOrder)
 void symmetriseMap(MultidimArray<double> &img, FileName &fn_sym, bool do_wrap)
 {
 
-	if (img.getDim() != 3)
-		REPORT_ERROR("symmetriseMap ERROR: symmetriseMap can only be run on 3D maps!");
+    if (img.getDim() != 3)
+        REPORT_ERROR("symmetriseMap ERROR: symmetriseMap can only be run on 3D maps!");
 
-	img.setXmippOrigin();
+    img.setXmippOrigin();
 
-	SymList SL;
-	SL.read_sym_file(fn_sym);
+    SymList SL;
+    SL.read_sym_file(fn_sym);
 
-	Matrix2D<double> L(4, 4), R(4, 4); // A matrix from the list
+    Matrix2D<double> L(4, 4), R(4, 4); // A matrix from the list
     MultidimArray<double> sum, aux;
     sum = img;
     aux.resize(img);
 
-	for (int isym = 0; isym < SL.SymsNo(); isym++)
+    for (int isym = 0; isym < SL.SymsNo(); isym++)
     {
         SL.get_matrices(isym, L, R);
         applyGeometry(img, aux, R, IS_INV, do_wrap);
         sum += aux;
     }
 
-	// Overwrite the input
-	img = sum / (SL.SymsNo() + 1);
+    // Overwrite the input
+    img = sum / (SL.SymsNo() + 1);
 
 }

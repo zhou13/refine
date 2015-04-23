@@ -34,82 +34,82 @@ class CtffindRunner
 {
 public:
 
-	// I/O Parser
-	IOParser parser;
+    // I/O Parser
+    IOParser parser;
 
-	// Verbosity
-	int verb;
+    // Verbosity
+    int verb;
 
-	// Output rootname
-	FileName fn_in, fn_out;
+    // Output rootname
+    FileName fn_in, fn_out;
 
-	// Filenames of all the micrographs to estimate the CTF from
-	std::vector<FileName> fn_micrographs;
+    // Filenames of all the micrographs to estimate the CTF from
+    std::vector<FileName> fn_micrographs;
 
-	// Dimension of squared area of the micrograph to use for CTF estimation
-	int ctf_win;
+    // Dimension of squared area of the micrograph to use for CTF estimation
+    int ctf_win;
 
-	// CTFFIND3 executable
-	FileName fn_ctffind3_exe;
+    // CTFFIND3 executable
+    FileName fn_ctffind3_exe;
 
-	// Continue an old run: only estimate CTF if logfile WITH Final Values line does not yet exist, otherwise skip the micrograph
-	bool continue_old;
+    // Continue an old run: only estimate CTF if logfile WITH Final Values line does not yet exist, otherwise skip the micrograph
+    bool continue_old;
 
-	////// CTFFIND3 parameters
-	// Size of the box to calculate FFTw
-	double box_size;
+    ////// CTFFIND3 parameters
+    // Size of the box to calculate FFTw
+    double box_size;
 
-	// Minimum and maximum resolution (in A) to be taken into account
-	double resol_min, resol_max;
+    // Minimum and maximum resolution (in A) to be taken into account
+    double resol_min, resol_max;
 
-	// Defocus search parameters (in A, positive is underfocus)
-	double min_defocus, max_defocus, step_defocus;
+    // Defocus search parameters (in A, positive is underfocus)
+    double min_defocus, max_defocus, step_defocus;
 
-	// Amount of astigmatism (in A)
-	double amount_astigmatism;
+    // Amount of astigmatism (in A)
+    double amount_astigmatism;
 
-	// Voltage (kV)
-	double Voltage;
+    // Voltage (kV)
+    double Voltage;
 
-	// Spherical aberration
-	double Cs;
+    // Spherical aberration
+    double Cs;
 
-	// Amplitude contrast (e.g. 0.07)
-	double AmplitudeConstrast;
+    // Amplitude contrast (e.g. 0.07)
+    double AmplitudeConstrast;
 
-	// Magnification
-	double Magnification;
+    // Magnification
+    double Magnification;
 
-	// Detector pixel size (um)
-	double PixelSize;
+    // Detector pixel size (um)
+    double PixelSize;
 
-	// Flag to only join results into a star file
-	bool do_only_join_results;
+    // Flag to only join results into a star file
+    bool do_only_join_results;
 
 public:
-	// Read command line arguments
-	void read(int argc, char **argv, int rank = 0);
+    // Read command line arguments
+    void read(int argc, char **argv, int rank = 0);
 
-	// Print usage instructions
-	void usage();
+    // Print usage instructions
+    void usage();
 
-	// Initialise some stuff after reading
-	void initialise();
+    // Initialise some stuff after reading
+    void initialise();
 
-	// Execute all CTFFIND3 jobs to get CTF parameters
-	void run();
+    // Execute all CTFFIND3 jobs to get CTF parameters
+    void run();
 
-	// Harvest all CTFFIND3 results into a single STAR file
-	void joinCtffindResults();
+    // Harvest all CTFFIND3 results into a single STAR file
+    void joinCtffindResults();
 
-	// Execute CTFFIND3 for a single micrograph
-	void executeCtffind3(FileName fn_mic);
+    // Execute CTFFIND3 for a single micrograph
+    void executeCtffind3(FileName fn_mic);
 
 };
 
 // Get micrograph metadata
 bool getCtffind3Results(FileName fn_mic, double &defU, double &defV, double &defAng, double &CC,
-		double &HT, double &CS, double &AmpCnst, double &XMAG, double &DStep, bool die_if_not_found = true);
+        double &HT, double &CS, double &AmpCnst, double &XMAG, double &DStep, bool die_if_not_found = true);
 
 
 #endif /* CTFFIND_RUNNER_H_ */

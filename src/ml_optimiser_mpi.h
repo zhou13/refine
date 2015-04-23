@@ -34,14 +34,14 @@
 #define MPITAG_INT 7
 
 #ifdef TIMING
-	int TIMING_MPIPACK, TIMING_MPIWAIT;
+    int TIMING_MPIPACK, TIMING_MPIWAIT;
 #endif
 
 class MlOptimiserMpi: public MlOptimiser
 {
 
 private:
-	MpiNode *node;
+    MpiNode *node;
 
 public:
 
@@ -52,7 +52,7 @@ public:
     // Name of the directory to write temporary files to
     FileName fn_scratch;
 
-	/** Destructor, calls MPI_Finalize */
+    /** Destructor, calls MPI_Finalize */
     ~MlOptimiserMpi()
     {
         delete node;

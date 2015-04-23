@@ -369,7 +369,7 @@ class ThreadTaskDistributor: public ParallelTaskDistributor
 
 public:
 
-	ThreadTaskDistributor(size_t nTasks, size_t bSize):ParallelTaskDistributor(nTasks, bSize) {}
+    ThreadTaskDistributor(size_t nTasks, size_t bSize):ParallelTaskDistributor(nTasks, bSize) {}
     virtual ~ThreadTaskDistributor(){};
 
 protected:

@@ -265,11 +265,11 @@ public:
      */
     int readFromOpenFile(const FileName &name, fImageHandler* hFile, long int select_img, bool is_2D = false)
     {
-    	int err = 0;
-    	err = _read(name, hFile, true, select_img, false, is_2D);
-    	// Reposition file pointer for a next read
-    	rewind(fimg);
-    	return err;
+        int err = 0;
+        err = _read(name, hFile, true, select_img, false, is_2D);
+        // Reposition file pointer for a next read
+        rewind(fimg);
+        return err;
     }
 
     /** General write function
@@ -720,7 +720,7 @@ public:
 
             int error_fseek = fseek( fimg, myoffset, SEEK_SET );
             if (error_fseek != 0)
-            	return -1;
+                return -1;
 
             for ( size_t myn=0; myn<NSIZE(data); myn++ )
             {
@@ -735,7 +735,7 @@ public:
                     //Read page from disc
                     size_t result = fread( page, readsize, 1, fimg );
                     if (result != 1)
-                    	return -2;
+                        return -2;
 
                     //swap per page
                     if (swap)
@@ -747,9 +747,9 @@ public:
                 if ( pad > 0 )
                 {
                     //fread( padpage, pad, 1, fimg);
-                	error_fseek = fseek( fimg, pad, SEEK_CUR );
+                    error_fseek = fseek( fimg, pad, SEEK_CUR );
                     if (error_fseek != 0)
-                    	return -1;
+                        return -1;
                 }
             }
             //if ( pad > 0 )
@@ -920,26 +920,26 @@ public:
      */
     void setStatisticsInHeader()
     {
-    	double avg,stddev,minval,maxval;
-    	data.computeStats(avg, stddev, minval, maxval);
-    	MDMainHeader.setValue(EMDL_IMAGE_STATS_AVG, avg);
-    	MDMainHeader.setValue(EMDL_IMAGE_STATS_STDDEV, stddev);
-    	MDMainHeader.setValue(EMDL_IMAGE_STATS_MIN, minval);
-    	MDMainHeader.setValue(EMDL_IMAGE_STATS_MAX, maxval);
+        double avg,stddev,minval,maxval;
+        data.computeStats(avg, stddev, minval, maxval);
+        MDMainHeader.setValue(EMDL_IMAGE_STATS_AVG, avg);
+        MDMainHeader.setValue(EMDL_IMAGE_STATS_STDDEV, stddev);
+        MDMainHeader.setValue(EMDL_IMAGE_STATS_MIN, minval);
+        MDMainHeader.setValue(EMDL_IMAGE_STATS_MAX, maxval);
     }
 
     void setSamplingRateInHeader(double rate_x, double rate_y = -1., double rate_z = -1.)
     {
-    	MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X, rate_x);
-    	if (rate_y < 0.)
-    		rate_y = rate_x;
-    	MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Y, rate_y);
-    	if (ZSIZE(data)>1)
-    	{
-    	   	if (rate_z < 0.)
-    	    	rate_z = rate_x;
-    	   	MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Z, rate_z);
-    	}
+        MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_X, rate_x);
+        if (rate_y < 0.)
+            rate_y = rate_x;
+        MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Y, rate_y);
+        if (ZSIZE(data)>1)
+        {
+            if (rate_z < 0.)
+                rate_z = rate_x;
+            MDMainHeader.setValue(EMDL_IMAGE_SAMPLINGRATE_Z, rate_z);
+        }
     }
 
     /** Show image properties
@@ -1021,7 +1021,7 @@ public:
         name.decompose(dump, fileName);
         // Subtract 1 to have numbering 0...N-1 instead of 1...N
         if (dump > 0)
-        	dump--;
+            dump--;
 
         fileName = fileName.removeFileFormat();
 
@@ -1130,7 +1130,7 @@ private:
         name.decompose(dump, filename);
         // Subtract 1 to have numbering 0...N-1 instead of 1...N
         if (dump > 0)
-        	dump--;
+            dump--;
         filename = name;
 
         if (select_img == -1)
@@ -1158,7 +1158,7 @@ private:
         else if (ext_name.contains("mrcs") || (is_2D && ext_name.contains("mrc")) )//mrc stack MUST go BEFORE plain MRC
             err = readMRC(select_img, true);
         else if (select_img >= 0 && ext_name.contains("mrc"))
-        	REPORT_ERROR("Image::read ERROR: stacks of images in MRC-format should have extension .mrcs; .mrc extensions are reserved for 3D maps.");
+            REPORT_ERROR("Image::read ERROR: stacks of images in MRC-format should have extension .mrcs; .mrc extensions are reserved for 3D maps.");
         else if (ext_name.contains("mrc")) // mrc 3D map
             err = readMRC(select_img, false);
         else if (ext_name.contains("img") || ext_name.contains("hed"))//
@@ -1190,7 +1190,7 @@ private:
         name.decompose(aux, filNamePlusExt);
         // Subtract 1 to have numbering 0...N-1 instead of 1...N
         if (aux > 0)
-        	aux--;
+            aux--;
 
         if (select_img == -1)
             select_img = aux;
@@ -1254,7 +1254,7 @@ private:
                Ydim!=_Ydim ||
                Zdim!=_Zdim
               )
-            	REPORT_ERROR("write: target and source objects have different size");
+                REPORT_ERROR("write: target and source objects have different size");
             if(mode==WRITE_REPLACE && select_img>_Ndim)
                 REPORT_ERROR("write: cannot replace image stack is not large enough");
             if(auxI.replaceNsize <1 &&

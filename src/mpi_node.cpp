@@ -68,10 +68,10 @@ bool MpiNode::isMaster() const
 
 int MpiNode::myRandomSubset() const
 {
-	if (rank == 0)
-		return 0;
-	else
-		return (rank % 2 == 0) ? 2 : 1;
+    if (rank == 0)
+        return 0;
+    else
+        return (rank % 2 == 0) ? 2 : 1;
 }
 
 void MpiNode::barrierWait()
@@ -84,120 +84,120 @@ void MpiNode::barrierWait()
 int MpiNode::relion_MPI_Send(void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {
 
-	int result;
-	double start_time = MPI_Wtime();
+    int result;
+    double start_time = MPI_Wtime();
 
 #define ONLY_NORMAL_SEND
 #ifdef ONLY_NORMAL_SEND
-	result = MPI_Send(buf, count, datatype, dest, tag, comm);
-	if (result != MPI_SUCCESS)
-	{
-		report_MPI_ERROR(result);
-	}
+    result = MPI_Send(buf, count, datatype, dest, tag, comm);
+    if (result != MPI_SUCCESS)
+    {
+        report_MPI_ERROR(result);
+    }
 #else
-	// Only use Bsend for larger messages, otherwise use normal send
-	if (count > 100)
-	{
-		int size;
-		MPI_Pack_size( count, datatype, comm, &size );
-		char *membuff;
+    // Only use Bsend for larger messages, otherwise use normal send
+    if (count > 100)
+    {
+        int size;
+        MPI_Pack_size( count, datatype, comm, &size );
+        char *membuff;
 
-		// Allocate memory for the package to be sent
-		int attach_result = MPI_Buffer_attach( malloc(size + MPI_BSEND_OVERHEAD ), size + MPI_BSEND_OVERHEAD );
-		if (attach_result != MPI_SUCCESS)
-		{
-			report_MPI_ERROR(result);
-		}
+        // Allocate memory for the package to be sent
+        int attach_result = MPI_Buffer_attach( malloc(size + MPI_BSEND_OVERHEAD ), size + MPI_BSEND_OVERHEAD );
+        if (attach_result != MPI_SUCCESS)
+        {
+            report_MPI_ERROR(result);
+        }
 
-		// Actually start sending the message
-		result = MPI_Bsend(buf, count, datatype, dest, tag, comm);
-		if (result != MPI_SUCCESS)
-		{
-			report_MPI_ERROR(result);
-		}
+        // Actually start sending the message
+        result = MPI_Bsend(buf, count, datatype, dest, tag, comm);
+        if (result != MPI_SUCCESS)
+        {
+            report_MPI_ERROR(result);
+        }
 
-		// The following will only complete once the message has been successfully sent (i.e. also received on the other side)
-		int deattach_result = MPI_Buffer_detach( &membuff, &size);
-		if (deattach_result != MPI_SUCCESS)
-		{
-			report_MPI_ERROR(result);
-		}
-	}
-	else
-	{
-		result = MPI_Send(buf, count, datatype, dest, tag, comm);
-		if (result != MPI_SUCCESS)
-		{
-			report_MPI_ERROR(result);
-		}
-	}
+        // The following will only complete once the message has been successfully sent (i.e. also received on the other side)
+        int deattach_result = MPI_Buffer_detach( &membuff, &size);
+        if (deattach_result != MPI_SUCCESS)
+        {
+            report_MPI_ERROR(result);
+        }
+    }
+    else
+    {
+        result = MPI_Send(buf, count, datatype, dest, tag, comm);
+        if (result != MPI_SUCCESS)
+        {
+            report_MPI_ERROR(result);
+        }
+    }
 #endif
 
 #ifdef VERBOSE_MPISENDRECV
-	if (count > 100)
-		std::cerr <<" relion_MPI_Send: message to " << dest << " of size "<< count << " arrived in " << MPI_Wtime() - start_time << " seconds" << std::endl;
+    if (count > 100)
+        std::cerr <<" relion_MPI_Send: message to " << dest << " of size "<< count << " arrived in " << MPI_Wtime() - start_time << " seconds" << std::endl;
 #endif
-	return result;
+    return result;
 
 }
 
 int MpiNode::relion_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status &status)
 {
-	int result;
-	MPI_Request request;
-	double current_time = MPI_Wtime();
-	double start_time = current_time;
+    int result;
+    MPI_Request request;
+    double current_time = MPI_Wtime();
+    double start_time = current_time;
 
-	// First make a non-blocking receive
-	int result_irecv = MPI_Irecv(buf, count, datatype, source, tag, comm, &request);
-	if (result_irecv != MPI_SUCCESS)
-	{
-		report_MPI_ERROR(result_irecv);
-	}
+    // First make a non-blocking receive
+    int result_irecv = MPI_Irecv(buf, count, datatype, source, tag, comm, &request);
+    if (result_irecv != MPI_SUCCESS)
+    {
+        report_MPI_ERROR(result_irecv);
+    }
 
-	// I could do something in between. If not, Irecv == Recv
-	// Wait for it to finish (MPI_Irecv + MPI_Wait == MPI_Recv)
-	result = MPI_Wait(&request, &status);
-	if (result != MPI_SUCCESS)
-	{
-		report_MPI_ERROR(result);
-	}
+    // I could do something in between. If not, Irecv == Recv
+    // Wait for it to finish (MPI_Irecv + MPI_Wait == MPI_Recv)
+    result = MPI_Wait(&request, &status);
+    if (result != MPI_SUCCESS)
+    {
+        report_MPI_ERROR(result);
+    }
 
 #ifdef VERBOSE_MPISENDRECV
-	if (count > 100)
-		std::cerr <<" relion_MPI_Recv: message from "<<source << " of size "<< count <<" arrived in " << MPI_Wtime() - start_time << " seconds" << std::endl;
+    if (count > 100)
+        std::cerr <<" relion_MPI_Recv: message from "<<source << " of size "<< count <<" arrived in " << MPI_Wtime() - start_time << " seconds" << std::endl;
 #endif
-	return result;
+    return result;
 
 }
 
 
 int MpiNode::relion_MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)
 {
-	int result;
+    int result;
 
-	result = MPI_Bcast(buffer, count, datatype, root, comm);
-	if (result != MPI_SUCCESS)
-	{
-		report_MPI_ERROR(result);
-	}
+    result = MPI_Bcast(buffer, count, datatype, root, comm);
+    if (result != MPI_SUCCESS)
+    {
+        report_MPI_ERROR(result);
+    }
 
-	return result;
+    return result;
 
 }
 
 void MpiNode::report_MPI_ERROR(int error_code)
 {
-	char error_string[200];
-	int length_of_error_string, error_class;
-	MPI_Error_class(error_code, &error_class);
-	MPI_Error_string(error_class, error_string, &length_of_error_string);
-	fprintf(stderr, "%3d: %s\n", rank, error_string);
-	MPI_Error_string(error_code, error_string, &length_of_error_string);
-	fprintf(stderr, "%3d: %s\n", rank, error_string);
+    char error_string[200];
+    int length_of_error_string, error_class;
+    MPI_Error_class(error_code, &error_class);
+    MPI_Error_string(error_class, error_string, &length_of_error_string);
+    fprintf(stderr, "%3d: %s\n", rank, error_string);
+    MPI_Error_string(error_code, error_string, &length_of_error_string);
+    fprintf(stderr, "%3d: %s\n", rank, error_string);
 
-	std::cerr.flush();
-	REPORT_ERROR("Encountered an MPI-related error, see above. Now exiting...");
+    std::cerr.flush();
+    REPORT_ERROR("Encountered an MPI-related error, see above. Now exiting...");
 }
 
 
@@ -210,29 +210,29 @@ void printMpiNodesMachineNames(MpiNode &node, int nthreads)
 
     if (node.isMaster())
     {
-    	std::cout << " === RELION MPI setup ===" << std::endl;
-    	std::cout << " + Number of MPI processes             = " << node.size << std::endl;
-    	if (nthreads > 1)
-    	{
-    		std::cout << " + Number of threads per MPI process  = " << nthreads << std::endl;
-    		std::cout << " + Total number of threads therefore  = " << nthreads * node.size << std::endl;
-		}
-    	std::cout << " + Master  (0) runs on host            = " << nodename << std::endl;
-    	std::cout.flush();
+        std::cout << " === RELION MPI setup ===" << std::endl;
+        std::cout << " + Number of MPI processes             = " << node.size << std::endl;
+        if (nthreads > 1)
+        {
+            std::cout << " + Number of threads per MPI process  = " << nthreads << std::endl;
+            std::cout << " + Total number of threads therefore  = " << nthreads * node.size << std::endl;
+        }
+        std::cout << " + Master  (0) runs on host            = " << nodename << std::endl;
+        std::cout.flush();
     }
     node.barrierWait();
 
     for (int slave = 1; slave < node.size; slave++)
     {
-    	if (slave == node.rank)
-    	{
-    		std::cout << " + Slave ";
-    		std::cout.width(5);
-    		std::cout << slave;
-    		std::cout << " runs on host            = " << nodename << std::endl;
-    		std::cout.flush();
-		}
-    	node.barrierWait();
+        if (slave == node.rank)
+        {
+            std::cout << " + Slave ";
+            std::cout.width(5);
+            std::cout << slave;
+            std::cout << " runs on host            = " << nodename << std::endl;
+            std::cout.flush();
+        }
+        node.barrierWait();
     }
 
     if (node.isMaster())

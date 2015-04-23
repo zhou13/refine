@@ -182,9 +182,9 @@ enum EMDLabel
     EMDL_OPTIMISER_AUTO_LOCAL_HP_ORDER,
     EMDL_OPTIMISER_AVAILABLE_MEMORY,
     EMDL_OPTIMISER_BEST_RESOL_THUS_FAR,
-	EMDL_OPTIMISER_CHANGES_OPTIMAL_OFFSETS,
-	EMDL_OPTIMISER_CHANGES_OPTIMAL_ORIENTS,
-	EMDL_OPTIMISER_CHANGES_OPTIMAL_CLASSES,
+    EMDL_OPTIMISER_CHANGES_OPTIMAL_OFFSETS,
+    EMDL_OPTIMISER_CHANGES_OPTIMAL_ORIENTS,
+    EMDL_OPTIMISER_CHANGES_OPTIMAL_CLASSES,
     EMDL_OPTIMISER_COARSE_SIZE,
     EMDL_OPTIMISER_DATA_ARE_CTF_PHASE_FLIPPED,
     EMDL_OPTIMISER_DATA_STARFILE,
@@ -385,13 +385,13 @@ private:
     StaticInitialization()
     {
         ///==== Add labels entries from here in the SAME ORDER as declared in ENUM ==========
-    	EMDL::addLabel(EMDL_COMMENT, EMDL_STRING, "rlnComment", "A metadata comment (This is treated in a special way)");
+        EMDL::addLabel(EMDL_COMMENT, EMDL_STRING, "rlnComment", "A metadata comment (This is treated in a special way)");
 
         EMDL::addLabel(EMDL_AREA_ID, EMDL_LONG, "rlnAreaId", "ID (i.e. a unique number) of an area (i.e. field-of-view)");
         EMDL::addLabel(EMDL_AREA_NAME, EMDL_STRING, "rlnAreaName", "Name of an area (i.e. field-of-view)");
 
-    	EMDL::addLabel(EMDL_CTF_BFACTOR, EMDL_DOUBLE, "rlnBfactor", "B-factor (in A^2) that describes power spectrum fall-off");
-    	EMDL::addLabel(EMDL_CTF_SCALEFACTOR, EMDL_DOUBLE, "rlnCtfScalefactor", "Linear scale-factor on the CTF (values between 0 and 1)");
+        EMDL::addLabel(EMDL_CTF_BFACTOR, EMDL_DOUBLE, "rlnBfactor", "B-factor (in A^2) that describes power spectrum fall-off");
+        EMDL::addLabel(EMDL_CTF_SCALEFACTOR, EMDL_DOUBLE, "rlnCtfScalefactor", "Linear scale-factor on the CTF (values between 0 and 1)");
         EMDL::addLabel(EMDL_CTF_VOLTAGE, EMDL_DOUBLE, "rlnVoltage", "Voltage of the microscope (in kV)");
         EMDL::addLabel(EMDL_CTF_DEFOCUSU, EMDL_DOUBLE, "rlnDefocusU", "Defocus in U-direction (in Angstroms, positive values for underfocus)");
         EMDL::addLabel(EMDL_CTF_DEFOCUSV, EMDL_DOUBLE, "rlnDefocusV", "Defocus in V-direction (in Angstroms, positive values for underfocus)");
@@ -410,10 +410,10 @@ private:
         EMDL::addLabel(EMDL_CTF_Q0, EMDL_DOUBLE, "rlnAmplitudeContrast", "Amplitude contrast (as a fraction, i.e. 10% = 0.1)");
         EMDL::addLabel(EMDL_CTF_VALUE, EMDL_DOUBLE, "rlnCtfValue", "Value of the Contrast Transfer Function");
 
-    	EMDL::addLabel(EMDL_IMAGE_NAME, EMDL_STRING, "rlnImageName", "Name of an image");
-    	EMDL::addLabel(EMDL_IMAGE_RECONSTRUCT_NAME, EMDL_STRING, "rlnReconstructImageName", "Name of an image to be used for reconstruction only");
-    	EMDL::addLabel(EMDL_IMAGE_ID, EMDL_LONG, "rlnImageId", "ID (i.e. a unique number) of an image");
-    	EMDL::addLabel(EMDL_IMAGE_ENABLED, EMDL_BOOL, "rlnEnabled", "Not used in RELION, only included for backward compatibility with XMIPP selfiles");
+        EMDL::addLabel(EMDL_IMAGE_NAME, EMDL_STRING, "rlnImageName", "Name of an image");
+        EMDL::addLabel(EMDL_IMAGE_RECONSTRUCT_NAME, EMDL_STRING, "rlnReconstructImageName", "Name of an image to be used for reconstruction only");
+        EMDL::addLabel(EMDL_IMAGE_ID, EMDL_LONG, "rlnImageId", "ID (i.e. a unique number) of an image");
+        EMDL::addLabel(EMDL_IMAGE_ENABLED, EMDL_BOOL, "rlnEnabled", "Not used in RELION, only included for backward compatibility with XMIPP selfiles");
         EMDL::addLabel(EMDL_IMAGE_DATATYPE, EMDL_INT, "rlnDataType", "Type of data stored in an image (e.g. int, double etc)");
         EMDL::addLabel(EMDL_IMAGE_DIMENSIONALITY, EMDL_INT, "rlnDataDimensionality", "Dimensionality of data stored in an image (i.e. 2 or 3)");
         EMDL::addLabel(EMDL_IMAGE_BEAMTILT_X, EMDL_DOUBLE, "rlnBeamTiltX", "Beam tilt in the X-direction (in mrad)");
@@ -501,9 +501,9 @@ private:
         EMDL::addLabel(EMDL_OPTIMISER_ACCURACY_ROT, EMDL_DOUBLE, "rlnOverallAccuracyRotations", "Overall accuracy of the rotational assignments (in degrees)");
         EMDL::addLabel(EMDL_OPTIMISER_ACCURACY_TRANS, EMDL_DOUBLE, "rlnOverallAccuracyTranslations", "Overall accuracy of the translational assignments (in pixels)");
         EMDL::addLabel(EMDL_OPTIMISER_ADAPTIVE_FRACTION, EMDL_DOUBLE, "rlnAdaptiveOversampleFraction", "Fraction of the weights that will be oversampled in a second pass of the adaptive oversampling strategy");
-		EMDL::addLabel(EMDL_OPTIMISER_ADAPTIVE_OVERSAMPLING, EMDL_INT, "rlnAdaptiveOversampleOrder", "Order of the adaptive oversampling (0=no oversampling, 1= 2x oversampling; 2= 4x oversampling, etc)");
-		EMDL::addLabel(EMDL_OPTIMISER_AUTO_LOCAL_HP_ORDER, EMDL_INT, "rlnAutoLocalSearchesHealpixOrder", "Healpix order (before oversampling) from which autosampling procedure will use local angular searches");
-		EMDL::addLabel(EMDL_OPTIMISER_AVAILABLE_MEMORY, EMDL_DOUBLE, "rlnAvailableMemory", "Available memory per computing node (i.e. per MPI-process)");
+        EMDL::addLabel(EMDL_OPTIMISER_ADAPTIVE_OVERSAMPLING, EMDL_INT, "rlnAdaptiveOversampleOrder", "Order of the adaptive oversampling (0=no oversampling, 1= 2x oversampling; 2= 4x oversampling, etc)");
+        EMDL::addLabel(EMDL_OPTIMISER_AUTO_LOCAL_HP_ORDER, EMDL_INT, "rlnAutoLocalSearchesHealpixOrder", "Healpix order (before oversampling) from which autosampling procedure will use local angular searches");
+        EMDL::addLabel(EMDL_OPTIMISER_AVAILABLE_MEMORY, EMDL_DOUBLE, "rlnAvailableMemory", "Available memory per computing node (i.e. per MPI-process)");
         EMDL::addLabel(EMDL_OPTIMISER_BEST_RESOL_THUS_FAR, EMDL_DOUBLE, "rlnBestResolutionThusFar", "The highest resolution that has been obtained in this optimization thus far");
         EMDL::addLabel(EMDL_OPTIMISER_COARSE_SIZE, EMDL_INT, "rlnCoarseImageSize", "Current size of the images to be used in the first pass of the adaptive oversampling strategy (may be smaller than the original image size)");
         EMDL::addLabel(EMDL_OPTIMISER_CHANGES_OPTIMAL_OFFSETS, EMDL_DOUBLE, "rlnChangesOptimalOffsets", "The average change in optimal translation in the last iteration (in pixels) ");
@@ -603,7 +603,7 @@ private:
         EMDL::addLabel(EMDL_POSTPROCESS_GUINIER_VALUE_SHARPENED, EMDL_DOUBLE, "rlnLogAmplitudesSharpened", "Y-value for Guinier plot: the logarithm of the radially averaged amplitudes after sharpening");
         EMDL::addLabel(EMDL_POSTPROCESS_GUINIER_VALUE_INTERCEPT, EMDL_DOUBLE, "rlnLogAmplitudesIntercept", "Y-value for Guinier plot: the fitted plateau of the logarithm of the radially averaged amplitudes");
         EMDL::addLabel(EMDL_POSTPROCESS_GUINIER_RESOL_SQUARED, EMDL_DOUBLE, "rlnResolutionSquared", "X-value for Guinier plot: squared resolution in 1/Angstrom^2");
-		EMDL::addLabel(EMDL_POSTPROCESS_MTF_VALUE, EMDL_DOUBLE, "rlnMtfValue", "Value of the detectors modulation transfer function (between 0 and 1)");
+        EMDL::addLabel(EMDL_POSTPROCESS_MTF_VALUE, EMDL_DOUBLE, "rlnMtfValue", "Value of the detectors modulation transfer function (between 0 and 1)");
 
         EMDL::addLabel(EMDL_SAMPLING_IS_3D, EMDL_BOOL, "rlnIs3DSampling", "Flag to indicate this concerns a 3D sampling ");
         EMDL::addLabel(EMDL_SAMPLING_IS_3D_TRANS, EMDL_BOOL, "rlnIs3DTranslationalSampling", "Flag to indicate this concerns a x,y,z-translational sampling ");
@@ -619,8 +619,8 @@ private:
         EMDL::addLabel(EMDL_SELECTED, EMDL_BOOL, "rlnSelected", "Flag whether an entry in a metadatatable is selected in the viewer or not");
         EMDL::addLabel(EMDL_SELECT_PARTICLES_ZSCORE, EMDL_DOUBLE, "rlnParticleSelectZScore", "Sum of Z-scores from particle_select. High Z-scores are likely to be outliers.");
         EMDL::addLabel(EMDL_SORTED_IDX, EMDL_LONG, "rlnSortedIndex", "Index of a metadata entry after sorting (first sorted index is 0).");
-		EMDL::addLabel(EMDL_PERFRAME_CUMULATIVE_WEIGHT, EMDL_DOUBLE, "rlnPerFrameCumulativeWeight", "Sum of the resolution-dependent relative weights from the first frame until the given frame");
-		EMDL::addLabel(EMDL_PERFRAME_RELATIVE_WEIGHT, EMDL_DOUBLE, "rlnPerFrameRelativeWeight", "The resolution-dependent relative weights for a given frame");
+        EMDL::addLabel(EMDL_PERFRAME_CUMULATIVE_WEIGHT, EMDL_DOUBLE, "rlnPerFrameCumulativeWeight", "Sum of the resolution-dependent relative weights from the first frame until the given frame");
+        EMDL::addLabel(EMDL_PERFRAME_RELATIVE_WEIGHT, EMDL_DOUBLE, "rlnPerFrameRelativeWeight", "The resolution-dependent relative weights for a given frame");
 
         EMDL::addLabel(EMDL_RESOLUTION, EMDL_DOUBLE, "rlnResolution", "Resolution (in 1/Angstroms)");
         EMDL::addLabel(EMDL_RESOLUTION_ANGSTROM, EMDL_DOUBLE, "rlnAngstromResolution", "Resolution (in Angstroms)");

@@ -37,7 +37,7 @@ class HealpixSampling
 {
 
 public:
-	/** Healpix sampling object */
+    /** Healpix sampling object */
     Healpix_Base healpix_base;
 
     /** Random perturbation */
@@ -118,14 +118,14 @@ public:
     // Destructor
     ~HealpixSampling()
     {
-    	directions_ipix.clear();
-    	directions_angles.clear();
-    	psi_angles.clear();
-    	pointer_dir_nonzeroprior.clear();
-    	pointer_psi_nonzeroprior.clear();
-    	directions_prior.clear();
-    	psi_prior.clear();
-    	translations.clear();
+        directions_ipix.clear();
+        directions_angles.clear();
+        psi_angles.clear();
+        pointer_dir_nonzeroprior.clear();
+        pointer_psi_nonzeroprior.clear();
+        directions_prior.clear();
+        psi_prior.clear();
+        translations.clear();
 
     }
 
@@ -137,21 +137,21 @@ public:
      * The in-plane (psi-angle) sampling is linear,
      * input_psi_sampling is modified to contain an integer number of equally-sized sampling points
      * For the 3D-case, a negative input_psi_sampling will result in a psi-sampling similar to the sqrt of a HealPix pixel area.
-	 *
+     *
      * The HEALPix sampling is implemented as described by Gorski et al (2005), The Astrophysical Journal, 622:759-771
      * The order defines the number of sampling points, and thereby the angular sampling rate
      * From this paper is the following table:
      *
-     * order	Npix	Theta-sampling
-     * 0		12		58.6
-     * 1		48		29.3
-     * 2		192		14.7
-     * 3		768		7.33
-     * 4		3072	3.66
-     * 5		12288	1.83
-     * 6		49152	0.55
-     * 7		196608	0.28
-     * 8		786432	0.14
+     * order    Npix    Theta-sampling
+     * 0        12      58.6
+     * 1        48      29.3
+     * 2        192     14.7
+     * 3        768     7.33
+     * 4        3072    3.66
+     * 5        12288   1.83
+     * 6        49152   0.55
+     * 7        196608  0.28
+     * 8        786432  0.14
      * etc...
      *
      * */
@@ -195,9 +195,9 @@ public:
      * Also precalculate their prior probabilities and store in directions_prior and psi_prior
      */
     void selectOrientationsWithNonZeroPriorProbability(
-    		double prior_rot, double prior_tilt, double prior_psi,
-    		double sigma_rot, double sigma_tilt, double sigma_psi,
-    		double sigma_cutoff = 3.);
+            double prior_rot, double prior_tilt, double prior_psi,
+            double sigma_rot, double sigma_tilt, double sigma_psi,
+            double sigma_cutoff = 3.);
 
     /* Randomly reject part of te non-zero prior probabilities, so that the optimization no longer follows the steepest downward gradient
      * This procedure was inspired by Hans Elmlund's PRIME algorithm.
@@ -283,7 +283,7 @@ public:
      * etc.
      */
     void getTranslations(long int itrans, int oversampling_order,
-								    std::vector<Matrix1D<double> > &my_translations);
+                                    std::vector<Matrix1D<double> > &my_translations);
 
     /* Get the vectors of (rot, tilt, psi) angle triplets for a more finely (oversampled) sampling
      * The oversampling_order is the difference in order of the original (coarse) and the oversampled (fine) sampling
@@ -318,11 +318,11 @@ public:
      * etc.
      */
     void pushbackOversampledPsiAngles(long int ipsi, int oversampling_order,
-    		double rot, double tilt, std::vector<Matrix1D<double> > &oversampled_orientations);
+            double rot, double tilt, std::vector<Matrix1D<double> > &oversampled_orientations);
 
     /* Calculate an angular distance between two sets of Euler angles */
     double calculateAngularDistance(double rot1, double tilt1, double psi1,
-    		double rot2, double tilt2, double psi2);
+            double rot2, double tilt2, double psi2);
 
     /* Write a BILD file describing the angular distribution
      *  R determines the radius of the sphere on which cylinders will be placed
@@ -330,7 +330,7 @@ public:
      *  width_frac determines how broad each cylinder is. frac=1 means they touch each other
      * */
     void writeBildFileOrientationalDistribution(MultidimArray<double> &pdf_direction,
-    		FileName &fn_bild, double R, double offset = 0., double Rmax_frac = 0.3, double width_frac = 0.5);
+            FileName &fn_bild, double R, double offset = 0., double Rmax_frac = 0.3, double width_frac = 0.5);
 
 private:
 
@@ -353,7 +353,7 @@ private:
     /* eliminate symmetry-related points based on simple geometrical considerations,
         symmetry group, symmetry order */
     void removeSymmetryEquivalentPointsGeometric(const int symmetry, int sym_order,
-												 std::vector <Matrix1D<double> >  &sampling_points_vector);
+                                                 std::vector <Matrix1D<double> >  &sampling_points_vector);
 
 
 

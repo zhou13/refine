@@ -40,184 +40,184 @@ class ParticlePolisher
 {
 public:
 
-	// I/O Parser
-	IOParser parser;
+    // I/O Parser
+    IOParser parser;
 
-	// Verbosity
-	int verb;
+    // Verbosity
+    int verb;
 
-	// Input & Output rootname
-	FileName fn_in, fn_out, fn_sym, fn_mask;
+    // Input & Output rootname
+    FileName fn_in, fn_out, fn_sym, fn_mask;
 
-	// The experimental model
-	Experiment exp_model;
+    // The experimental model
+    Experiment exp_model;
 
-	// Standard deviation for a Gaussian-weight on the distance between particles in the micrograph
-	double sigma_neighbour_distance;
+    // Standard deviation for a Gaussian-weight on the distance between particles in the micrograph
+    double sigma_neighbour_distance;
 
-	// Maximum resolution in pre-frame reconstructions
-	double perframe_highres;
+    // Maximum resolution in pre-frame reconstructions
+    double perframe_highres;
 
-	// Flag to indicate all calculations have to be repeated from scratch
-	// if false, then intermediate files are re-read from disc and earlier calculations are skipped
-	bool do_start_all_over;
+    // Flag to indicate all calculations have to be repeated from scratch
+    // if false, then intermediate files are re-read from disc and earlier calculations are skipped
+    bool do_start_all_over;
 
-	// First and last frame numbers to include in the average
-	int first_frame, last_frame;
+    // First and last frame numbers to include in the average
+    int first_frame, last_frame;
 
-	// Which fitting mode (lienar/logarithmic/nofit)
-	int fitting_mode;
+    // Which fitting mode (lienar/logarithmic/nofit)
+    int fitting_mode;
 
-	// Running average window with used for the determination of the frame movements
-	// This will be used to exclude the first and last few frames from the fit (but not from the polsihing!)
-	int running_average_width;
+    // Running average window with used for the determination of the frame movements
+    // This will be used to exclude the first and last few frames from the fit (but not from the polsihing!)
+    int running_average_width;
 
-	// CTF stuff for the reconstructions
-	bool do_ctf, ctf_phase_flipped, only_flip_phases, intact_ctf_first_peak;
+    // CTF stuff for the reconstructions
+    bool do_ctf, ctf_phase_flipped, only_flip_phases, intact_ctf_first_peak;
 
-	// Pixel size (for B-factors)
-	double angpix;
+    // Pixel size (for B-factors)
+    double angpix;
 
-	// Original image size
-	int ori_size;
+    // Original image size
+    int ori_size;
 
-	// Skip B-factor weighting
-	bool do_weighting;
+    // Skip B-factor weighting
+    bool do_weighting;
 
-	// Minimum resolution (in Angstrom) for fitting of B-factor in Guinier plot
-	double fit_minres;
+    // Minimum resolution (in Angstrom) for fitting of B-factor in Guinier plot
+    double fit_minres;
 
-	// Width of a running average window for the single-frame reconstructions
-	int frame_running_average;
+    // Width of a running average window for the single-frame reconstructions
+    int frame_running_average;
 
-	// Vector with the B-factors for all individual frames
-	MultidimArray<double> perframe_bfactors;
+    // Vector with the B-factors for all individual frames
+    MultidimArray<double> perframe_bfactors;
 
-	// Fitted movement coordinates for all input images
-	MultidimArray<double> fitted_movements;
+    // Fitted movement coordinates for all input images
+    MultidimArray<double> fitted_movements;
 
-	// Image with the mask (used for relative weighting of each frame)
-	Image<double> Imask;
+    // Image with the mask (used for relative weighting of each frame)
+    Image<double> Imask;
 
-	// FSC curve of the masked, averages of all single-frame reconstructions
-	MultidimArray<double> fsc_average;
+    // FSC curve of the masked, averages of all single-frame reconstructions
+    MultidimArray<double> fsc_average;
 
-	// Metadatatable with the information from the polished particles
-	MetaDataTable MDshiny;
+    // Metadatatable with the information from the polished particles
+    MetaDataTable MDshiny;
 
-	// Tabulated sin and cosine functions for shifts in Fourier space
-	TabSine tab_sin;
-	TabCosine tab_cos;
+    // Tabulated sin and cosine functions for shifts in Fourier space
+    TabSine tab_sin;
+    TabCosine tab_cos;
 
-	// Reference volume reconstructed from the initially-polished particles to be used for per-particle CTF-refinement and beamtilt-refinement
-	Projector PPrefvol_half1, PPrefvol_half2;
+    // Reference volume reconstructed from the initially-polished particles to be used for per-particle CTF-refinement and beamtilt-refinement
+    Projector PPrefvol_half1, PPrefvol_half2;
 
-	// Normalise the polished particles?
-	bool do_normalise;
+    // Normalise the polished particles?
+    bool do_normalise;
 
-	// Radius of the background-circle for noise normalisation (in pixels)
-	int bg_radius;
+    // Radius of the background-circle for noise normalisation (in pixels)
+    int bg_radius;
 
-	// Sigma-levels for dust removal
-	double white_dust_stddev, black_dust_stddev;
+    // Sigma-levels for dust removal
+    double white_dust_stddev, black_dust_stddev;
 
-	// Maximum useful resolution in the reconstruction
-	double maxres_model;
+    // Maximum useful resolution in the reconstruction
+    double maxres_model;
 
-	// Maximum beam tilt to analyse, and step-size to sample in X and Y
-	double beamtilt_max, beamtilt_step;
-	// Number of sampled beamtilts
-	int nr_sampled_beam_tilts;
+    // Maximum beam tilt to analyse, and step-size to sample in X and Y
+    double beamtilt_max, beamtilt_step;
+    // Number of sampled beamtilts
+    int nr_sampled_beam_tilts;
 
-	// Names of the data sets to be separated in the beamtilt refinement
-	std::vector<FileName> fn_beamtilt_groups;
+    // Names of the data sets to be separated in the beamtilt refinement
+    std::vector<FileName> fn_beamtilt_groups;
 
-	// Minimum resolution to take beamtilt into account
-	double minres_beamtilt;
+    // Minimum resolution to take beamtilt into account
+    double minres_beamtilt;
 
-	// Weighted squared-differences for all beamtilts
-	MultidimArray<double> diff2_beamtilt;
+    // Weighted squared-differences for all beamtilts
+    MultidimArray<double> diff2_beamtilt;
 
-	// Weighted squared-differences for all defocus values
-	MultidimArray<double> defocus_shift_allmics;
+    // Weighted squared-differences for all defocus values
+    MultidimArray<double> defocus_shift_allmics;
 
-	// Optimal beamtilts for each data set
-	std::vector<Matrix1D<double> > best_beamtilts;
+    // Optimal beamtilts for each data set
+    std::vector<Matrix1D<double> > best_beamtilts;
 
-	// Per-particle CTF optimisation
-	double defocus_shift_max, defocus_shift_step;
+    // Per-particle CTF optimisation
+    double defocus_shift_max, defocus_shift_step;
 
 
 public:
-	// Read command line arguments
-	void read(int argc, char **argv);
+    // Read command line arguments
+    void read(int argc, char **argv);
 
-	// Print usage instructions
-	void usage();
+    // Print usage instructions
+    void usage();
 
-	// Initialise some stuff after reading
-	void initialise();
+    // Initialise some stuff after reading
+    void initialise();
 
-	// General Running
-	void run();
+    // General Running
+    void run();
 
-	// Fit the beam-induced translations for all average micrographs
-	void fitMovementsAllMicrographs();
+    // Fit the beam-induced translations for all average micrographs
+    void fitMovementsAllMicrographs();
 
-	// Fit a function through th observed movements
-	void fitMovementsOneMicrograph(long int imic);
+    // Fit a function through th observed movements
+    void fitMovementsOneMicrograph(long int imic);
 
-	// Get the B-factor for all single-frame reconstruction
-	void calculateAllSingleFrameReconstructionsAndBfactors();
+    // Get the B-factor for all single-frame reconstruction
+    void calculateAllSingleFrameReconstructionsAndBfactors();
 
-	// Read/write of STAR file with all per-frame B-factors
-	bool readStarFileBfactors(FileName fn_star);
-	void writeStarFileBfactors(FileName fn_star);
+    // Read/write of STAR file with all per-frame B-factors
+    bool readStarFileBfactors(FileName fn_star);
+    void writeStarFileBfactors(FileName fn_star);
 
-	// Write out an additional STAR file with the resolution-dependent, relative weights per frame
-	void writeStarFileRelativeWeights(FileName fn_star);
+    // Write out an additional STAR file with the resolution-dependent, relative weights per frame
+    void writeStarFileRelativeWeights(FileName fn_star);
 
-	// Get the B-factor for a single-frame reconstruction
-	void calculateSingleFrameReconstruction(int iframe, int ihalf);
+    // Get the B-factor for a single-frame reconstruction
+    void calculateSingleFrameReconstruction(int iframe, int ihalf);
 
-	// Run standard post-processing (only unmasked FSC  on the single-frame reconstruction.
-	void postProcessSingleFrameReconstruction(int this_frame);
+    // Run standard post-processing (only unmasked FSC  on the single-frame reconstruction.
+    void postProcessSingleFrameReconstruction(int this_frame);
 
-	// Calculate the B-factors for a single-frame reconstruction
-	void calculateBfactorSingleFrameReconstruction(int this_frame, double &bfactor, double &offset, double &corr_coeff);
+    // Calculate the B-factors for a single-frame reconstruction
+    void calculateBfactorSingleFrameReconstruction(int this_frame, double &bfactor, double &offset, double &corr_coeff);
 
-	// Calculate the average of all single-frame rconstructions (for a given half)
-	void calculateAverageAllSingleFrameReconstructions(int ihalf);
+    // Calculate the average of all single-frame rconstructions (for a given half)
+    void calculateAverageAllSingleFrameReconstructions(int ihalf);
 
-	// Movie frame re-alignment for a single micrograph
-	void polishParticlesOneMicrograph(long int imic);
+    // Movie frame re-alignment for a single micrograph
+    void polishParticlesOneMicrograph(long int imic);
 
-	// Movie frame re-alignment for all micrographs
-	void polishParticlesAllMicrographs();
+    // Movie frame re-alignment for all micrographs
+    void polishParticlesAllMicrographs();
 
-	// Write out the resulting STAR files
-	void writeStarFilePolishedParticles();
+    // Write out the resulting STAR files
+    void writeStarFilePolishedParticles();
 
-	// Reconstruct the two independent halves of the shiny particles
-	void reconstructShinyParticlesAndFscWeight(int ipass);
+    // Reconstruct the two independent halves of the shiny particles
+    void reconstructShinyParticlesAndFscWeight(int ipass);
 
-	// Reconstruct one half of the shiny particles
-	void reconstructShinyParticlesOneHalf(int ihalf);
+    // Reconstruct one half of the shiny particles
+    void reconstructShinyParticlesOneHalf(int ihalf);
 
-	// Optimize the beam tilt and defocus for all beamtilt groups and/or micrographs
-	void optimiseBeamTiltAndDefocus();
+    // Optimize the beam tilt and defocus for all beamtilt groups and/or micrographs
+    void optimiseBeamTiltAndDefocus();
 
-	// Optimisation for each micrograph (may be run in parallel)
-	void optimiseBeamTiltAndDefocusOneMicrograph(int imic);
+    // Optimisation for each micrograph (may be run in parallel)
+    void optimiseBeamTiltAndDefocusOneMicrograph(int imic);
 
-	// After optimising, one general function to set results in the MetaDataTable (because optimisation may have been done in parallel)
-	void applyOptimisedBeamTiltsAndDefocus();
+    // After optimising, one general function to set results in the MetaDataTable (because optimisation may have been done in parallel)
+    void applyOptimisedBeamTiltsAndDefocus();
 
-	// Optimise beamtilt separately for datasets in different directories
-	void getBeamTiltGroups();
+    // Optimise beamtilt separately for datasets in different directories
+    void getBeamTiltGroups();
 
-	// Initialise some arrays for parallelisation purposes
-	void initialiseSquaredDifferenceVectors();
+    // Initialise some arrays for parallelisation purposes
+    void initialiseSquaredDifferenceVectors();
 };
 
 

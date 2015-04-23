@@ -51,60 +51,60 @@
 void CTF::read(MetaDataTable &MD1, MetaDataTable &MD2, long int objectID)
 {
 
-	if (!MD1.getValue(EMDL_CTF_VOLTAGE, kV, objectID))
-		if (!MD2.getValue(EMDL_CTF_VOLTAGE, kV, objectID))
-			kV=200;
+    if (!MD1.getValue(EMDL_CTF_VOLTAGE, kV, objectID))
+        if (!MD2.getValue(EMDL_CTF_VOLTAGE, kV, objectID))
+            kV=200;
 
-	if (!MD1.getValue(EMDL_CTF_DEFOCUSU, DeltafU, objectID))
-		if (!MD2.getValue(EMDL_CTF_DEFOCUSU, DeltafU, objectID))
-			DeltafU=0;
+    if (!MD1.getValue(EMDL_CTF_DEFOCUSU, DeltafU, objectID))
+        if (!MD2.getValue(EMDL_CTF_DEFOCUSU, DeltafU, objectID))
+            DeltafU=0;
 
-	if (!MD1.getValue(EMDL_CTF_DEFOCUSV, DeltafV, objectID))
-		if (!MD2.getValue(EMDL_CTF_DEFOCUSV, DeltafV, objectID))
-			DeltafV=DeltafU;
+    if (!MD1.getValue(EMDL_CTF_DEFOCUSV, DeltafV, objectID))
+        if (!MD2.getValue(EMDL_CTF_DEFOCUSV, DeltafV, objectID))
+            DeltafV=DeltafU;
 
-	if (!MD1.getValue(EMDL_CTF_DEFOCUS_ANGLE, azimuthal_angle, objectID))
-		if (!MD2.getValue(EMDL_CTF_DEFOCUS_ANGLE, azimuthal_angle, objectID))
-			azimuthal_angle=0;
+    if (!MD1.getValue(EMDL_CTF_DEFOCUS_ANGLE, azimuthal_angle, objectID))
+        if (!MD2.getValue(EMDL_CTF_DEFOCUS_ANGLE, azimuthal_angle, objectID))
+            azimuthal_angle=0;
 
-	if (!MD1.getValue(EMDL_CTF_CS, Cs, objectID))
-		if (!MD2.getValue(EMDL_CTF_CS, Cs, objectID))
-			Cs=0;
+    if (!MD1.getValue(EMDL_CTF_CS, Cs, objectID))
+        if (!MD2.getValue(EMDL_CTF_CS, Cs, objectID))
+            Cs=0;
 
-	if (!MD1.getValue(EMDL_CTF_BFACTOR, Bfac, objectID))
-		if (!MD2.getValue(EMDL_CTF_BFACTOR, Bfac, objectID))
-			Bfac=0;
+    if (!MD1.getValue(EMDL_CTF_BFACTOR, Bfac, objectID))
+        if (!MD2.getValue(EMDL_CTF_BFACTOR, Bfac, objectID))
+            Bfac=0;
 
-	if (!MD1.getValue(EMDL_CTF_SCALEFACTOR, scale, objectID))
-		if (!MD2.getValue(EMDL_CTF_SCALEFACTOR, scale, objectID))
-			scale=1;
+    if (!MD1.getValue(EMDL_CTF_SCALEFACTOR, scale, objectID))
+        if (!MD2.getValue(EMDL_CTF_SCALEFACTOR, scale, objectID))
+            scale=1;
 
-	if (!MD1.getValue(EMDL_CTF_Q0, Q0, objectID))
-		if (!MD2.getValue(EMDL_CTF_Q0, Q0, objectID))
-			Q0=0;
+    if (!MD1.getValue(EMDL_CTF_Q0, Q0, objectID))
+        if (!MD2.getValue(EMDL_CTF_Q0, Q0, objectID))
+            Q0=0;
 
-	initialise();
+    initialise();
 }
 void CTF::setValues(double _defU, double _defV, double _defAng, double _voltage,
-		double _Cs, double _Q0, double _Bfac, double _scale)
+        double _Cs, double _Q0, double _Bfac, double _scale)
 {
-	kV              = _voltage;
-	DeltafU         = _defU;
-	DeltafV         = _defV;
-	azimuthal_angle = _defAng;
-	Cs              = _Cs;
-	Bfac            = _Bfac;
-	scale           = _scale;
-	Q0              = _Q0;
+    kV              = _voltage;
+    DeltafU         = _defU;
+    DeltafV         = _defV;
+    azimuthal_angle = _defAng;
+    Cs              = _Cs;
+    Bfac            = _Bfac;
+    scale           = _scale;
+    Q0              = _Q0;
 
-	initialise();
+    initialise();
 }
 /* Read from 1 MetaDataTable ----------------------------------------------- */
 void CTF::read(MetaDataTable &MD)
 {
-	MetaDataTable MDempty;
-	MDempty.addObject(); // add one empty object
-	read(MD, MDempty);
+    MetaDataTable MDempty;
+    MDempty.addObject(); // add one empty object
+    read(MD, MDempty);
 }
 
 /* Write ------------------------------------------------------------------- */
@@ -137,7 +137,7 @@ void CTF::clear()
 void CTF::initialise()
 {
 
-	// Change units
+    // Change units
     double local_Cs = Cs * 1e7;
     double local_kV = kV * 1e3;
     rad_azimuth = DEG2RAD(azimuthal_angle);
@@ -163,41 +163,41 @@ void CTF::initialise()
     K4 = -Bfac / 4.;
 
     if (Q0 < 0. || Q0 > 1.)
-    	REPORT_ERROR("CTF::initialise ERROR: AmplitudeContrast Q0 cannot be smaller than zero or larger than one!");
+        REPORT_ERROR("CTF::initialise ERROR: AmplitudeContrast Q0 cannot be smaller than zero or larger than one!");
 
     if (ABS(DeltafU) < 1e-6 && ABS(DeltafV) < 1e-6 && ABS(Q0) < 1e-6 && ABS(Cs) < 1e-6)
-    	REPORT_ERROR("CTF::initialise: ERROR: CTF initialises to all-zero values. Was a correct STAR file provided?");
+        REPORT_ERROR("CTF::initialise: ERROR: CTF initialises to all-zero values. Was a correct STAR file provided?");
 
 }
 
 /* Generate a complete CTF Image ------------------------------------------------------ */
 void CTF::getFftwImage(MultidimArray<double> &result, int orixdim, int oriydim, double angpix,
-		    		bool do_abs, bool do_only_flip_phases, bool do_intact_until_first_peak, bool do_damping)
+                    bool do_abs, bool do_only_flip_phases, bool do_intact_until_first_peak, bool do_damping)
 {
 
-	double xs = (double)orixdim * angpix;
-	double ys = (double)oriydim * angpix;
-	FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM2D(result)
-	{
-		double x = (double)jp / xs;
-		double y = (double)ip / ys;
-		DIRECT_A2D_ELEM(result, i, j) = getCTF(x, y, do_abs, do_only_flip_phases, do_intact_until_first_peak, do_damping);
-	}
+    double xs = (double)orixdim * angpix;
+    double ys = (double)oriydim * angpix;
+    FOR_ALL_ELEMENTS_IN_FFTW_TRANSFORM2D(result)
+    {
+        double x = (double)jp / xs;
+        double y = (double)ip / ys;
+        DIRECT_A2D_ELEM(result, i, j) = getCTF(x, y, do_abs, do_only_flip_phases, do_intact_until_first_peak, do_damping);
+    }
 }
 
 void CTF::getCenteredImage(MultidimArray<double> &result, double Tm,
-		    		bool do_abs, bool do_only_flip_phases, bool do_intact_until_first_peak, bool do_damping)
+                    bool do_abs, bool do_only_flip_phases, bool do_intact_until_first_peak, bool do_damping)
 {
-	result.setXmippOrigin();
-	double xs = (double)XSIZE(result) * Tm;
-	double ys = (double)YSIZE(result) * Tm;
+    result.setXmippOrigin();
+    double xs = (double)XSIZE(result) * Tm;
+    double ys = (double)YSIZE(result) * Tm;
 
-	FOR_ALL_ELEMENTS_IN_ARRAY2D(result)
-	{
-		double x = (double)j / xs;
-		double y = (double)i / ys;
-		A2D_ELEM(result, i, j) = getCTF(x, y, do_abs, do_only_flip_phases, do_intact_until_first_peak, do_damping);
-	}
+    FOR_ALL_ELEMENTS_IN_ARRAY2D(result)
+    {
+        double x = (double)j / xs;
+        double y = (double)i / ys;
+        A2D_ELEM(result, i, j) = getCTF(x, y, do_abs, do_only_flip_phases, do_intact_until_first_peak, do_damping);
+    }
 
 }
 

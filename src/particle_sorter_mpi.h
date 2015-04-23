@@ -28,10 +28,10 @@
 class ParticleSorterMpi : public ParticleSorter
 {
 private:
-	MpiNode *node;
+    MpiNode *node;
 
 public:
-	/** Destructor, calls MPI_Finalize */
+    /** Destructor, calls MPI_Finalize */
     ~ParticleSorterMpi()
     {
         delete node;

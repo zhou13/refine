@@ -37,7 +37,7 @@
 class Projector
 {
 public:
-	// The Fourier-space image data array
+    // The Fourier-space image data array
     MultidimArray<Complex > data;
 
     // Only points within this many pixels from the origin (in the original size) will be interpolated
@@ -73,7 +73,7 @@ public:
      */
     Projector()
     {
-    	clear();
+        clear();
     }
 
    /** Constructor with parameters
@@ -87,17 +87,17 @@ public:
     Projector(int _ori_size, int _interpolator = TRILINEAR, int _padding_factor_3d = 2, int _r_min_nn = 10)
     {
 
-    	// Store original dimension
-    	ori_size = _ori_size;
+        // Store original dimension
+        ori_size = _ori_size;
 
-    	// Padding factor for the map
-    	padding_factor = _padding_factor_3d;
+        // Padding factor for the map
+        padding_factor = _padding_factor_3d;
 
-    	// Interpolation scheme
-    	interpolator = _interpolator;
+        // Interpolation scheme
+        interpolator = _interpolator;
 
-    	// Minimum radius for NN interpolation
-    	r_min_nn = _r_min_nn;
+        // Minimum radius for NN interpolation
+        r_min_nn = _r_min_nn;
 
     }
 
@@ -110,34 +110,34 @@ public:
      * Projector V2(V1);
      * @endcode
      */
-	Projector(const Projector& op)
+    Projector(const Projector& op)
     {
-		clear();
+        clear();
         *this = op;
     }
 
-	/** Assignment.
+    /** Assignment.
      *
      * You can build as complex assignment expressions as you like. Multiple
      * assignment is allowed.
      */
-	Projector& operator=(const Projector& op)
+    Projector& operator=(const Projector& op)
     {
         if (&op != this)
         {
-        	data = op.data;
-        	ori_size = op.ori_size;
-        	pad_size = op.pad_size;
-        	r_max = op.r_max;
-        	r_min_nn = op.r_min_nn;
-        	interpolator = op.interpolator;
-        	padding_factor = op.padding_factor;
-        	ref_dim = op.ref_dim;
+            data = op.data;
+            ori_size = op.ori_size;
+            pad_size = op.pad_size;
+            r_max = op.r_max;
+            r_min_nn = op.r_min_nn;
+            interpolator = op.interpolator;
+            padding_factor = op.padding_factor;
+            ref_dim = op.ref_dim;
         }
         return *this;
     }
 
-	/** Destructor
+    /** Destructor
       *
       * Clears everything
       *
@@ -155,8 +155,8 @@ public:
      */
     void clear()
     {
-    	data.clear();
-    	r_max = r_min_nn = interpolator = padding_factor = ref_dim = pad_size = 0;
+        data.clear();
+        r_max = r_min_nn = interpolator = padding_factor = ref_dim = pad_size = 0;
     }
 
     /*
@@ -192,34 +192,34 @@ public:
    void griddingCorrect(MultidimArray<double> &vol_in);
 
    /*
-	* Get a 2D Fourier Transform from the 2D or 3D data array
-	* Depending on the dimension of the map, this will be a projection or a rotation operation
-	*/
-	void get2DFourierTransform(MultidimArray<Complex > &img_out, Matrix2D<double> &A, bool inv)
-	{
-		// Rotation of a 3D Fourier Transform
-		switch (ref_dim)
-		{
-		case 2:
-		   rotate2D(img_out, A, inv);
-		   break;
-		case 3:
-		   project(img_out, A, inv);
-		   break;
-		default:
-		   REPORT_ERROR("Projector::get2DSlice%%ERROR: Dimension of the data array should be 2 or 3");
-		}
-	}
+    * Get a 2D Fourier Transform from the 2D or 3D data array
+    * Depending on the dimension of the map, this will be a projection or a rotation operation
+    */
+    void get2DFourierTransform(MultidimArray<Complex > &img_out, Matrix2D<double> &A, bool inv)
+    {
+        // Rotation of a 3D Fourier Transform
+        switch (ref_dim)
+        {
+        case 2:
+           rotate2D(img_out, A, inv);
+           break;
+        case 3:
+           project(img_out, A, inv);
+           break;
+        default:
+           REPORT_ERROR("Projector::get2DSlice%%ERROR: Dimension of the data array should be 2 or 3");
+        }
+    }
 
-	/*
-	* Get a 2D slice from the 3D map (forward projection)
-	*/
-	void project(MultidimArray<Complex > &img_out, Matrix2D<double> &A, bool inv);
+    /*
+    * Get a 2D slice from the 3D map (forward projection)
+    */
+    void project(MultidimArray<Complex > &img_out, Matrix2D<double> &A, bool inv);
 
-	/*
-	* Get an in-plane rotated version of the 2D map (mere interpolation)
-	*/
-	void rotate2D(MultidimArray<Complex > &img_out, Matrix2D<double> &A, bool inv);
+    /*
+    * Get an in-plane rotated version of the 2D map (mere interpolation)
+    */
+    void rotate2D(MultidimArray<Complex > &img_out, Matrix2D<double> &A, bool inv);
 
 
 };

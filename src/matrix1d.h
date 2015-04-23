@@ -299,8 +299,8 @@ public:
      */
     Matrix1D(bool column = true)
     {
-    	coreInit();
-    	row = ! column;
+        coreInit();
+        row = ! column;
     }
 
     /** Dimension constructor
@@ -321,8 +321,8 @@ public:
      */
     Matrix1D(int dim, bool column = true)
     {
-    	coreInit();
-    	row = ! column;
+        coreInit();
+        row = ! column;
         resize(dim);
     }
 
@@ -364,7 +364,7 @@ public:
          {
              resize(op1);
              for (int i = 0; i < vdim; i++)
-             	vdata[i] = op1.vdata[i];
+                vdata[i] = op1.vdata[i];
              row=op1.row;
          }
 
@@ -447,30 +447,30 @@ public:
         T * new_vdata;
         try
         {
-        	new_vdata = new T [Xdim];
+            new_vdata = new T [Xdim];
         }
         catch (std::bad_alloc &)
         {
-			REPORT_ERROR("Allocate: No space left");
+            REPORT_ERROR("Allocate: No space left");
         }
 
-		// Copy needed elements, fill with 0 if necessary
-		for (int j = 0; j < Xdim; j++)
-		{
-			T val;
-			if (j >= vdim)
-				val = 0;
-			else
-				val = vdata[j];
-			new_vdata[j] = val;
-		}
+        // Copy needed elements, fill with 0 if necessary
+        for (int j = 0; j < Xdim; j++)
+        {
+            T val;
+            if (j >= vdim)
+                val = 0;
+            else
+                val = vdata[j];
+            new_vdata[j] = val;
+        }
 
-		// deallocate old vector
-		coreDeallocate();
+        // deallocate old vector
+        coreDeallocate();
 
-		// assign *this vector to the newly created
-		vdata = new_vdata;
-		vdim = Xdim;
+        // assign *this vector to the newly created
+        vdata = new_vdata;
+        vdim = Xdim;
 
     }
 
@@ -576,10 +576,10 @@ public:
      */
     void initConstant(T val)
     {
-    	for (int j = 0; j < vdim; j++)
-    	{
-    		vdata[j] = val;
-    	}
+        for (int j = 0; j < vdim; j++)
+        {
+            vdata[j] = val;
+        }
     }
 
     /** Initialize to zeros with current size.
@@ -600,8 +600,8 @@ public:
      */
     void initZeros(int Xdim)
     {
-    	if (vdim!=Xdim)
-    		resize(Xdim);
+        if (vdim!=Xdim)
+            resize(Xdim);
         memset(vdata,0,vdim*sizeof(T));
     }
 
@@ -617,13 +617,13 @@ public:
     template <typename T1>
     void initZeros(const Matrix1D<T1>& op)
     {
-    	if (vdim!=op.vdim)
-    		resize(op);
+        if (vdim!=op.vdim)
+            resize(op);
         memset(vdata,0,vdim*sizeof(T));
-	}
+    }
     //@}
 
-	/// @name Matrix1D operators
+    /// @name Matrix1D operators
     //@{
     /** v3 = v1 * k.
      */
@@ -631,7 +631,7 @@ public:
     {
         Matrix1D<T> tmp(*this);
         for (int i=0; i < vdim; i++)
-        	tmp.vdata[i] = vdata[i] * op1;
+            tmp.vdata[i] = vdata[i] * op1;
         return tmp;
     }
 
@@ -641,7 +641,7 @@ public:
     {
         Matrix1D<T> tmp(*this);
         for (int i=0; i < vdim; i++)
-        	tmp.vdata[i] = vdata[i] / op1;
+            tmp.vdata[i] = vdata[i] / op1;
         return tmp;
     }
 
@@ -651,7 +651,7 @@ public:
     {
         Matrix1D<T> tmp(*this);
         for (int i=0; i < vdim; i++)
-        	tmp.vdata[i] = vdata[i] + op1;
+            tmp.vdata[i] = vdata[i] + op1;
         return tmp;
     }
 
@@ -661,7 +661,7 @@ public:
     {
         Matrix1D<T> tmp(*this);
         for (int i=0; i < vdim; i++)
-        	tmp.vdata[i] = vdata[i] - op1;
+            tmp.vdata[i] = vdata[i] - op1;
         return tmp;
     }
 
@@ -671,7 +671,7 @@ public:
     {
         Matrix1D<T> tmp(op2);
         for (int i=0; i < op2.vdim; i++)
-        	tmp.vdata[i] = op1 * op2.vdata[i];
+            tmp.vdata[i] = op1 * op2.vdata[i];
         return tmp;
     }
 
@@ -681,7 +681,7 @@ public:
     {
         Matrix1D<T> tmp(op2);
         for (int i=0; i < op2.vdim; i++)
-        	tmp.vdata[i] = op1 / op2.vdata[i];
+            tmp.vdata[i] = op1 / op2.vdata[i];
         return tmp;
     }
 
@@ -691,7 +691,7 @@ public:
     {
         Matrix1D<T> tmp(op2);
         for (int i=0; i < op2.vdim; i++)
-        	tmp.vdata[i] = op1 + op2.vdata[i];
+            tmp.vdata[i] = op1 + op2.vdata[i];
         return tmp;
     }
 
@@ -707,7 +707,7 @@ public:
             REPORT_ERROR("Not same sizes in vector summation");
 
         for (int i = 0; i < vdim; i++)
-        	vdata[i] += op1.vdata[i];
+            vdata[i] += op1.vdata[i];
     }
 
     /** v3 = k - v2.
@@ -716,7 +716,7 @@ public:
     {
         Matrix1D<T> tmp(op2);
         for (int i=0; i < op2.vdim; i++)
-        	tmp.vdata[i] = op1 - op2.vdata[i];
+            tmp.vdata[i] = op1 - op2.vdata[i];
         return tmp;
     }
 
@@ -732,7 +732,7 @@ public:
             REPORT_ERROR("Not same sizes in vector summation");
 
         for (int i = 0; i < vdim; i++)
-        	vdata[i] -= op1.vdata[i];
+            vdata[i] -= op1.vdata[i];
     }
 
     /** v3 *= k.
@@ -740,7 +740,7 @@ public:
     void operator*=(T op1)
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] *= op1;
+            vdata[i] *= op1;
     }
 
     /** v3 /= k.
@@ -748,7 +748,7 @@ public:
      void operator/=(T op1)
      {
          for (int i=0; i < vdim; i++)
-         	vdata[i] /= op1;
+            vdata[i] /= op1;
      }
 
      /** v3 += k.
@@ -756,7 +756,7 @@ public:
     void operator+=(T op1)
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] += op1;
+            vdata[i] += op1;
     }
 
     /** v3 -= k.
@@ -764,7 +764,7 @@ public:
      void operator-=(T op1)
      {
          for (int i=0; i < vdim; i++)
-         	vdata[i] -= op1;
+            vdata[i] -= op1;
      }
 
      /** v3 = v1 * v2.
@@ -773,7 +773,7 @@ public:
     {
          Matrix1D<T> tmp(op1);
          for (int i=0; i < vdim; i++)
-         	tmp.vdata[i] = vdata[i] * op1.vdata[i];
+            tmp.vdata[i] = vdata[i] * op1.vdata[i];
          return tmp;
     }
 
@@ -783,7 +783,7 @@ public:
     {
          Matrix1D<T> tmp(op1);
          for (int i=0; i < vdim; i++)
-         	tmp.vdata[i] = vdata[i] / op1.vdata[i];
+            tmp.vdata[i] = vdata[i] / op1.vdata[i];
          return tmp;
     }
      /** v3 = v1 + v2.
@@ -792,7 +792,7 @@ public:
     {
          Matrix1D<T> tmp(op1);
          for (int i=0; i < vdim; i++)
-         	tmp.vdata[i] = vdata[i] + op1.vdata[i];
+            tmp.vdata[i] = vdata[i] + op1.vdata[i];
          return tmp;
     }
 
@@ -802,7 +802,7 @@ public:
     {
          Matrix1D<T> tmp(op1);
          for (int i=0; i < vdim; i++)
-         	tmp.vdata[i] = vdata[i] - op1.vdata[i];
+            tmp.vdata[i] = vdata[i] - op1.vdata[i];
          return tmp;
     }
 
@@ -811,7 +811,7 @@ public:
     void operator*=(const Matrix1D<T>& op1)
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] *= op1.vdata[i];
+            vdata[i] *= op1.vdata[i];
     }
 
     /** v3 /= v2.
@@ -819,7 +819,7 @@ public:
     void operator/=(const Matrix1D<T>& op1)
     {
         for (int i=0; i < vdim; i++)
-         	vdata[i] /= op1.vdata[i];
+            vdata[i] /= op1.vdata[i];
     }
 
      /** v3 += v2.
@@ -827,7 +827,7 @@ public:
     void operator+=(const Matrix1D<T>& op1)
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] += op1.vdata[i];
+            vdata[i] += op1.vdata[i];
     }
 
     /** v3 -= v2.
@@ -835,7 +835,7 @@ public:
     void operator-=(const Matrix1D<T>& op1)
     {
         for (int i=0; i < vdim; i++)
-         	vdata[i] -= op1.vdata[i];
+            vdata[i] -= op1.vdata[i];
     }
 
     /** Unary minus.
@@ -852,7 +852,7 @@ public:
     {
         Matrix1D<T> tmp(*this);
         for (int i=0; i < vdim; i++)
-         	tmp.vdata[i] = - vdata[i];
+            tmp.vdata[i] = - vdata[i];
         return tmp;
     }
 
@@ -880,7 +880,7 @@ public:
     }
     //@}
 
-	/// @name Utilities for Matrix1D
+    /// @name Utilities for Matrix1D
     //@{
 
     /** Produce a vector suitable for working with Numerical Recipes
@@ -914,7 +914,7 @@ public:
     void selfCEIL()
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] = CEIL(vdata[i]);
+            vdata[i] = CEIL(vdata[i]);
     }
 
     /** FLOOR
@@ -925,7 +925,7 @@ public:
     void selfFLOOR()
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] = FLOOR(vdata[i]);
+            vdata[i] = FLOOR(vdata[i]);
     }
 
     /** ROUND
@@ -936,7 +936,7 @@ public:
     void selfROUND()
     {
         for (int i=0; i < vdim; i++)
-        	vdata[i] = ROUND(vdata[i]);
+            vdata[i] = ROUND(vdata[i]);
     }
 
     /** Index for the maximum element.
@@ -955,8 +955,8 @@ public:
         jmax = 0;
         T maxval = (*this)(0);
         for (int j = 0; j < vdim; j++)
-       	 if ( (*this)(j) > maxval )
-       		 jmax =j;
+         if ( (*this)(j) > maxval )
+             jmax =j;
     }
 
     /** Index for the minimum element.
@@ -975,8 +975,8 @@ public:
         jmin = 0;
         T minval = (*this)(0);
         for (int j = 0; j < vdim; j++)
-       	 if ( (*this)(j) < minval )
-       		 jmin =j;
+         if ( (*this)(j) < minval )
+             jmin =j;
     }
 
     /** Algebraic transpose of vector
@@ -1015,14 +1015,14 @@ public:
     double sum(bool average=false) const
     {
         double sum = 0;
-		for (int j = 0; j < vdim; j++)
-		{
-			sum += vdata[j];
-		}
-		if (average)
-			return sum/(double)vdim;
-		else
-			return sum;
+        for (int j = 0; j < vdim; j++)
+        {
+            sum += vdata[j];
+        }
+        if (average)
+            return sum/(double)vdim;
+        else
+            return sum;
     }
 
    /** Sum of squared vector values.
@@ -1037,11 +1037,11 @@ public:
     double sum2() const
     {
         double sum = 0;
-		for (int j = 0; j < vdim; j++)
-		{
-			sum += vdata[j] * vdata[j];
-		}
-		return sum;
+        for (int j = 0; j < vdim; j++)
+        {
+            sum += vdata[j] * vdata[j];
+        }
+        return sum;
     }
 
     /** Module of the vector
@@ -1086,11 +1086,11 @@ public:
      */
     void selfReverse()
     {
-    	for (int j = 0; j <= (int)(vdim - 1) / 2; j++)
-    	{
-    		T aux;
-    		SWAP(vdata[j], vdata[vdim-1-j], aux);
-    	}
+        for (int j = 0; j <= (int)(vdim - 1) / 2; j++)
+        {
+            T aux;
+            SWAP(vdata[j], vdata[vdim-1-j], aux);
+        }
     }
 
     /** Compute numerical derivative
@@ -1105,8 +1105,8 @@ public:
          const double i12=1.0/12.0;
          result.initZeros(*this);
          for (int i=STARTINGX(*this)+2; i<=FINISHINGX(*this)-2; i++)
-        	 result(i)=i12*(-(*this)(i+2)+8*(*this)(i+1)
-        			 -8*(*this)(i-1)+(*this)(i+2));
+             result(i)=i12*(-(*this)(i+2)+8*(*this)(i+1)
+                     -8*(*this)(i-1)+(*this)(i+2));
     }
 
     /** Output to output stream.*/
@@ -1121,15 +1121,15 @@ public:
 
         for (int j = 0; j < v.vdim; j++)
         {
-       	 max_val = XMIPP_MAX(max_val, v.vdata[j]);
+         max_val = XMIPP_MAX(max_val, v.vdata[j]);
         }
 
         int prec = bestPrecision(max_val, 10);
 
         for (int j = 0; j < v.vdim; j++)
         {
-       	 ostrm << floatToString((double) v.vdata[j], 10, prec)
-       	 << std::endl;
+         ostrm << floatToString((double) v.vdata[j], 10, prec)
+         << std::endl;
         }
         return ostrm;
     }
@@ -1188,7 +1188,7 @@ public:
      T accumulate = 0;
      for (int j = 0; j < v1.vdim; j++)
      {
-    	 accumulate += v1.vdata[j] * v2.vdata[j];
+         accumulate += v1.vdata[j] * v2.vdata[j];
      }
      return accumulate;
  }
@@ -1257,9 +1257,9 @@ public:
 
      for (int j = 0; j < v1.vdim; j++)
      {
-    	 temp       = XMIPP_MIN(v1.vdata[j], v2.vdata[j]);
-    	 v2.vdata[j] = XMIPP_MAX(v1.vdata[j], v2.vdata[j]);
-    	 v1.vdata[j] = temp;
+         temp       = XMIPP_MIN(v1.vdata[j], v2.vdata[j]);
+         v2.vdata[j] = XMIPP_MAX(v1.vdata[j], v2.vdata[j]);
+         v1.vdata[j] = temp;
      }
  }
 
@@ -1280,7 +1280,7 @@ public:
      v2.resize(v1.vdim);
      for (int j = 0; j < v1.vdim; j++)
      {
-    	 v2.vdata[j] = static_cast< T2 > (v1.vdata[j]);
+         v2.vdata[j] = static_cast< T2 > (v1.vdata[j]);
      }
 
  }

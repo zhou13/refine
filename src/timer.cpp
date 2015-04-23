@@ -185,55 +185,55 @@ void progress_bar(long rlen)
 
 void Timer::clear()
 {
-	start_times.clear();
-	counts.clear();
-	times.clear();
-	tags.clear();
+    start_times.clear();
+    counts.clear();
+    times.clear();
+    tags.clear();
 }
 
 void Timer::initZero()
 {
-	for (int i = 0; i < counts.size(); i++)
-	{
-		counts[i] = 0;
-		times[i] = 0;
-	}
+    for (int i = 0; i < counts.size(); i++)
+    {
+        counts[i] = 0;
+        times[i] = 0;
+    }
 }
 
 int Timer::setNew(const std::string tag)
 {
-	start_times.push_back(end_time);
-	counts.push_back(0);
-	times.push_back(0);
-	tags.push_back(tag);
-	return start_times.size() - 1;
+    start_times.push_back(end_time);
+    counts.push_back(0);
+    times.push_back(0);
+    tags.push_back(tag);
+    return start_times.size() - 1;
 }
 
 void Timer::tic(int timer)
 {
-	gettimeofday(&(start_times[timer]), NULL);
-	counts[timer]++;
+    gettimeofday(&(start_times[timer]), NULL);
+    counts[timer]++;
 }
 
 int Timer::toc(int timer)
 {
-	gettimeofday(&end_time, NULL);
-	times[timer] += (end_time.tv_sec - start_times[timer].tv_sec) * 1000000 +
-				   (end_time.tv_usec - start_times[timer].tv_usec);
+    gettimeofday(&end_time, NULL);
+    times[timer] += (end_time.tv_sec - start_times[timer].tv_sec) * 1000000 +
+                   (end_time.tv_usec - start_times[timer].tv_usec);
 }
 
 void Timer::printTimes(bool doClear)
 {
-	for (int i = 0; i < tags.size(); i++)
-	{
-		if (counts[i] > 0)
-		{
-			std::cout.width(35);
-			std::cout << std::left << tags[i] << ": " << times[i]/1000000<< " sec (" << times[i] / counts[i] << " microsec/operation)"<<std::endl;
-		}
-	}
-	if (doClear)
-		Timer::clear();
-	else
-		Timer::initZero();
+    for (int i = 0; i < tags.size(); i++)
+    {
+        if (counts[i] > 0)
+        {
+            std::cout.width(35);
+            std::cout << std::left << tags[i] << ": " << times[i]/1000000<< " sec (" << times[i] / counts[i] << " microsec/operation)"<<std::endl;
+        }
+    }
+    if (doClear)
+        Timer::clear();
+    else
+        Timer::initZero();
 }

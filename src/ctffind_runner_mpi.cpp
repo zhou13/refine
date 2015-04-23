@@ -33,46 +33,46 @@ void CtffindRunnerMpi::read(int argc, char **argv)
     // Possibly also read parallelisation-dependent variables here
 
     // Print out MPI info
-	printMpiNodesMachineNames(*node);
+    printMpiNodesMachineNames(*node);
 
 
 }
 void CtffindRunnerMpi::run()
 {
 
-	if (!do_only_join_results)
-	{
-		// Each node does part of the work
-		long int my_first_micrograph, my_last_micrograph, my_nr_micrographs;
-		divide_equally(fn_micrographs.size(), node->size, node->rank, my_first_micrograph, my_last_micrograph);
-		my_nr_micrographs = my_last_micrograph - my_first_micrograph + 1;
+    if (!do_only_join_results)
+    {
+        // Each node does part of the work
+        long int my_first_micrograph, my_last_micrograph, my_nr_micrographs;
+        divide_equally(fn_micrographs.size(), node->size, node->rank, my_first_micrograph, my_last_micrograph);
+        my_nr_micrographs = my_last_micrograph - my_first_micrograph + 1;
 
-		int barstep;
-		if (verb > 0)
-		{
-			std::cout << " Estimating CTF parameters using Niko Grigorieff's CTFFIND3 ..." << std::endl;
-			init_progress_bar(my_nr_micrographs);
-			barstep = XMIPP_MAX(1, my_nr_micrographs / 60);
-		}
+        int barstep;
+        if (verb > 0)
+        {
+            std::cout << " Estimating CTF parameters using Niko Grigorieff's CTFFIND3 ..." << std::endl;
+            init_progress_bar(my_nr_micrographs);
+            barstep = XMIPP_MAX(1, my_nr_micrographs / 60);
+        }
 
-		for (long int imic = my_first_micrograph; imic <= my_last_micrograph; imic++)
-		{
-			if (verb > 0 && imic % barstep == 0)
-				progress_bar(imic);
+        for (long int imic = my_first_micrograph; imic <= my_last_micrograph; imic++)
+        {
+            if (verb > 0 && imic % barstep == 0)
+                progress_bar(imic);
 
-			executeCtffind3(fn_micrographs[imic]);
-		}
-		if (verb > 0)
-			progress_bar(my_nr_micrographs);
-	}
+            executeCtffind3(fn_micrographs[imic]);
+        }
+        if (verb > 0)
+            progress_bar(my_nr_micrographs);
+    }
 
-	MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-	// Only the master writes the joined result file
-	if (node->isMaster())
-	{
-		joinCtffindResults();
-	}
+    // Only the master writes the joined result file
+    if (node->isMaster())
+    {
+        joinCtffindResults();
+    }
 
 }
 

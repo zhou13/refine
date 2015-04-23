@@ -38,7 +38,7 @@ void softMaskOutsideMap(MultidimArray<double> &vol, MultidimArray<double> &msk, 
 // 3. Putting a raised-cosine edge on the mask with width width_soft_mask_edge
 // If verb, then output description of steps and progress bars
 void autoMask(MultidimArray<double> &img_in, MultidimArray<double> &msk_out,
-		double  ini_mask_density_threshold, double extend_ini_mask, double width_soft_mask_edge, bool verb = false);
+        double  ini_mask_density_threshold, double extend_ini_mask, double width_soft_mask_edge, bool verb = false);
 
 // Fills mask with a soft-edge circular mask (soft-edge in between radius and radius_p), centred at (x, y, z)
 void raisedCosineMask(MultidimArray<double> &mask, double radius, double radius_p, int x, int y, int z = 0);

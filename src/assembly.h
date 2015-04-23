@@ -21,9 +21,9 @@
  * Hierarchical model for a macromolecular assembly, e.g. a DNA origami object
  *
  *  Assembly
- *   ->	Molecule
- *   	->	Residue
- *   		->	Atom  (either a true one or a coarse-grain pseudo-atom)
+ *   -> Molecule
+ *      ->  Residue
+ *          ->  Atom  (either a true one or a coarse-grain pseudo-atom)
  *
  *
  */
@@ -46,20 +46,20 @@ public:
         // Empty constructor
         Atom()
         {
-        	clear();
+            clear();
         }
 
         // Named constructor
         Atom(std::string in_name)
         {
-        	clear();
-        	name = in_name;
+            clear();
+            name = in_name;
         }
 
         // Destructor needed for work with vectors
         ~Atom()
         {
-        	clear();
+            clear();
         }
 
         // Initialize
@@ -85,21 +85,21 @@ public:
         // Empty Constructor
         Residue()
         {
-        	clear();
+            clear();
         }
 
         // Constructor
         Residue(std::string in_name, int in_number)
         {
-        	clear();
-        	name = in_name;
-        	number = in_number;
+            clear();
+            name = in_name;
+            number = in_number;
         }
 
         // Destructor needed for work with vectors
         ~Residue()
         {
-        	clear();
+            clear();
         }
 
         // Initialize
@@ -110,7 +110,7 @@ public:
 
         int numberOfAtoms()
         {
-        	return atoms.size();
+            return atoms.size();
         }
 
 };
@@ -130,21 +130,21 @@ public:
         // Empty Constructor
         Molecule()
         {
-        	clear();
+            clear();
         }
 
         // Constructor
         Molecule(std::string in_name, std::string in_alt_name="")
         {
-        	clear();
-        	name = in_name;
-        	alt_name = in_alt_name;
+            clear();
+            name = in_name;
+            alt_name = in_alt_name;
         }
 
         // Destructor needed for work with vectors
         ~Molecule()
         {
-        	clear();
+            clear();
         }
 
         // Initialize
@@ -153,7 +153,7 @@ public:
         // Number of residues in the molecule
         long int numberOfResidues()
         {
-        	return residues.size();
+            return residues.size();
         }
 
         // Insert a Residue at the specified position in this Molecule
@@ -183,27 +183,27 @@ public:
         // Empty Constructor
         Assembly()
         {
-        	clear();
+            clear();
         }
 
         // Named Constructor
         Assembly(std::string in_name)
         {
-        	clear();
-        	name = in_name;
+            clear();
+            name = in_name;
         }
 
-    	// Copy constructor
+        // Copy constructor
         Assembly(const Assembly& op)
-    	{
-    		clear();
-    		*this = op;
-    	}
+        {
+            clear();
+            *this = op;
+        }
 
-    	// Destructor needed for work with vectors
+        // Destructor needed for work with vectors
         ~Assembly()
         {
-        	clear();
+            clear();
         }
 
         // Initialize

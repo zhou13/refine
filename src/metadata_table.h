@@ -185,11 +185,11 @@ public:
                   long int objectID = -1) const
     {
         if (isEmpty())
-        	return false;
+            return false;
 
         MetaDataContainer * aux = getObject(objectID);
 
-		// Inside getValue of the container there will be a check of the correct type
+        // Inside getValue of the container there will be a check of the correct type
         bool result = aux->getValue(name, value);
         return result;
     }
@@ -222,7 +222,7 @@ public:
                 {
                     if (objects[idx] != aux)
                     {
-                    	objects[idx]->addValue(name, T());
+                        objects[idx]->addValue(name, T());
                     }
                 }
             }
@@ -233,7 +233,7 @@ public:
         {
             std::cerr << " %%WARNING%%: unsuccessful setValue" << std::endl;
             std::cerr << " isEmpty()= " << isEmpty() << std::endl;
-        	std::cerr << " EMDL::isValidLabel(name)= " << EMDL::isValidLabel(name) << std::endl;
+            std::cerr << " EMDL::isValidLabel(name)= " << EMDL::isValidLabel(name) << std::endl;
             std::cerr << " name= " << EMDL::label2Str(name) << " value= " << value <<std::endl;
             return false;
         }
@@ -243,60 +243,60 @@ public:
     // Have to pass dummy T parameter to get the template thing running?
     void sort(EMDLabel name, bool do_reverse = false, bool only_set_index = false)
     {
-    	if ( !(EMDL::isInt(name) || EMDL::isLong(name) || EMDL::isDouble(name)) )
-    		REPORT_ERROR("MetadataTable::sort%% ERROR: can only sorted numbers");
-    	std::vector<std::pair<double,long int> > vp;
-    	vp.reserve(objects.size());
-    	long int i = 0;
-    	FOR_ALL_OBJECTS_IN_METADATA_TABLE(*this)
-    	{
-    		double dval;
-    		if (EMDL::isInt(name))
-    		{
-    			int val;
-    			getValue(name, val);
-    			dval = (double) val;
-    		}
-    		else if (EMDL::isLong(name))
-    		{
-    			long int val;
-    			getValue(name, val);
-    			dval = (double) val;
-    		}
-    		else
-    		{
-    			//  EMDL::isDouble(name)
-    			getValue(name, dval);
-    		}
-    		vp.push_back(std::make_pair(dval, i));
-    		i++;
-    	}
+        if ( !(EMDL::isInt(name) || EMDL::isLong(name) || EMDL::isDouble(name)) )
+            REPORT_ERROR("MetadataTable::sort%% ERROR: can only sorted numbers");
+        std::vector<std::pair<double,long int> > vp;
+        vp.reserve(objects.size());
+        long int i = 0;
+        FOR_ALL_OBJECTS_IN_METADATA_TABLE(*this)
+        {
+            double dval;
+            if (EMDL::isInt(name))
+            {
+                int val;
+                getValue(name, val);
+                dval = (double) val;
+            }
+            else if (EMDL::isLong(name))
+            {
+                long int val;
+                getValue(name, val);
+                dval = (double) val;
+            }
+            else
+            {
+                //  EMDL::isDouble(name)
+                getValue(name, dval);
+            }
+            vp.push_back(std::make_pair(dval, i));
+            i++;
+        }
 
-    	std::sort(vp.begin(), vp.end());
-    	if (do_reverse)
-    		std::reverse(vp.begin(), vp.end());
+        std::sort(vp.begin(), vp.end());
+        if (do_reverse)
+            std::reverse(vp.begin(), vp.end());
 
-    	if (only_set_index)
-    	{
-    		// Add an extra column with the sorted position of each entry
-			for (long int j = 0; j < vp.size(); j++)
-			{
-				(*this).setValue(EMDL_SORTED_IDX, j, vp[j].second);
-			}
-    	}
-    	else
-    	{
-			// Change the actual order in the MetaDataTable
-    		MetaDataTable MDaux;
-			for (long int j = 0; j < vp.size(); j++)
-			{
-				MDaux.addObject();
-				MDaux.setObject((*this).getObject(vp[j].second));
-			}
-			*this = MDaux;
-    	}
-    	// return pointer to the beginning of the table
-    	firstObject();
+        if (only_set_index)
+        {
+            // Add an extra column with the sorted position of each entry
+            for (long int j = 0; j < (long)vp.size(); j++)
+            {
+                (*this).setValue(EMDL_SORTED_IDX, j, vp[j].second);
+            }
+        }
+        else
+        {
+            // Change the actual order in the MetaDataTable
+            MetaDataTable MDaux;
+            for (long int j = 0; j < (long)vp.size(); j++)
+            {
+                MDaux.addObject();
+                MDaux.setObject((*this).getObject(vp[j].second));
+            }
+            *this = MDaux;
+        }
+        // return pointer to the beginning of the table
+        firstObject();
     }
 
     bool valueExists(EMDLabel name)
@@ -367,7 +367,7 @@ public:
     bool readStarList(std::ifstream& in, std::vector<EMDLabel> *labelsVector = NULL);
 
     /* Read a MetaDataTable from a STAR-format data block
-	 *
+     *
      * If the data block contains a list and a table, the function will return 2,
      *  the first time it is called and the list is read into the MetaDataTable
      *  in that case the function needs to be called another time. The second time

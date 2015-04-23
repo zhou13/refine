@@ -124,17 +124,17 @@ void * _threadMain(void * data)
         //After awaked check what to do
         if (thMgr->workFunction != NULL)
         {
-        	try
-        	{
-        		thMgr->workFunction(*thArg);
-        		thMgr->wait(); //wait for finish together
-        	}
-        	catch (RelionError XE)
-        	{
-        		std::cerr << XE << std::endl
-        		          << "In thread " << thArg->thread_id << std::endl;
-        		pthread_exit(NULL);
-        	}
+            try
+            {
+                thMgr->workFunction(*thArg);
+                thMgr->wait(); //wait for finish together
+            }
+            catch (RelionError XE)
+            {
+                std::cerr << XE << std::endl
+                          << "In thread " << thArg->thread_id << std::endl;
+                pthread_exit(NULL);
+            }
         }
         else //exit thread
         {
@@ -189,7 +189,7 @@ ThreadManager::~ThreadManager()
     {
         wait();
         for (int i = 0; i < threads; ++i)
-        	pthread_join(ids[i], NULL);
+            pthread_join(ids[i], NULL);
     }
 
     delete barrier;
@@ -199,7 +199,7 @@ ThreadManager::~ThreadManager()
 
 void ThreadManager::run(ThreadFunction function)
 {
-	runAsync(function);
+    runAsync(function);
     //Wait on barrier to wait for threads finish
     wait();
 }
@@ -223,20 +223,20 @@ void ThreadManager::wait()
 ParallelTaskDistributor::ParallelTaskDistributor(size_t nTasks, size_t bSize)
 {
 
-	resize(nTasks, bSize);
+    resize(nTasks, bSize);
 }
 
 void ParallelTaskDistributor::resize(size_t nTasks, size_t bSize)
 {
-	if (!(nTasks && bSize && bSize <= nTasks))
-	{
-		std::cerr << " nTasks= " << nTasks << " bSize= " << bSize << std::endl;
-		REPORT_ERROR("nTasks and bSize should be > 0, also bSize <= nTasks");
-	}
+    if (!(nTasks && bSize && bSize <= nTasks))
+    {
+        std::cerr << " nTasks= " << nTasks << " bSize= " << bSize << std::endl;
+        REPORT_ERROR("nTasks and bSize should be > 0, also bSize <= nTasks");
+    }
 
-	numberOfTasks = nTasks;
-	blockSize = bSize;
-	assignedTasks = 0;
+    numberOfTasks = nTasks;
+    blockSize = bSize;
+    assignedTasks = 0;
 }
 
 void ParallelTaskDistributor::reset()

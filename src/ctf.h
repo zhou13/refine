@@ -130,7 +130,7 @@ public:
 
     /** Just set all values explicitly */
     void setValues(double _defU, double _defV, double _defAng,
-    		double _voltage, double _Cs, double _Q0, double _Bfac, double _scale = 1.);
+            double _voltage, double _Cs, double _Q0, double _Bfac, double _scale = 1.);
 
     /** Read from a single MetaDataTable */
     void read(MetaDataTable &MD);
@@ -147,10 +147,10 @@ public:
 
     /// Compute CTF at (U,V). Continuous frequencies
     inline double getCTF(double X, double Y,
-    		bool do_abs = false, bool do_only_flip_phases = false, bool do_intact_until_first_peak = false, bool do_damping = true) const
+            bool do_abs = false, bool do_only_flip_phases = false, bool do_intact_until_first_peak = false, bool do_damping = true) const
     {
         double u2 = X * X + Y * Y;
-        double u = sqrt(u2);
+        // double u = sqrt(u2);
         double u4 = u2 * u2;
         // if (u2>=ua2) return 0;
         double deltaf = getDeltaF(X, Y);
@@ -158,25 +158,25 @@ public:
         double retval;
         if (do_intact_until_first_peak && ABS(argument) < PI/2.)
         {
-        	retval = 1.;
+            retval = 1.;
         }
         else
         {
-        	double sine_part,cosine_part;
+            // double sine_part,cosine_part;
             retval = -(K3*sin(argument) - Q0*cos(argument)); // Q0 should be positive
         }
         if (do_damping)
         {
-        	double E = exp(K4 * u2); // B-factor decay (K4 = -Bfac/4);
-        	retval *= E;
+            double E = exp(K4 * u2); // B-factor decay (K4 = -Bfac/4);
+            retval *= E;
         }
         if (do_abs)
         {
-        	retval = ABS(retval);
+            retval = ABS(retval);
         }
         else if (do_only_flip_phases)
         {
-        	retval = (retval < 0.) ? -1. : 1.;
+            retval = (retval < 0.) ? -1. : 1.;
         }
         return scale * retval;
     }
@@ -205,11 +205,11 @@ public:
     /// Generate (Fourier-space, i.e. FFTW format) image with all CTF values.
     /// The dimensions of the result array should have been set correctly already
     void getFftwImage(MultidimArray < double > &result, int orixdim, int oriydim, double angpix,
-    		bool do_abs = false, bool do_only_flip_phases = false, bool do_intact_until_first_peak = false, bool do_damping = true);
+            bool do_abs = false, bool do_only_flip_phases = false, bool do_intact_until_first_peak = false, bool do_damping = true);
 
     /// Generate a centered image (with hermitian symmetry)
     void getCenteredImage(MultidimArray < double > &result, double angpix,
-    		bool do_abs = false, bool do_only_flip_phases = false, bool do_intact_until_first_peak = false, bool do_damping = true);
+            bool do_abs = false, bool do_only_flip_phases = false, bool do_intact_until_first_peak = false, bool do_damping = true);
 
 
 };

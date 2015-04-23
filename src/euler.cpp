@@ -92,7 +92,7 @@ void Euler_angles2matrix(double alpha, double beta, double gamma,
 
 /* Euler direction --------------------------------------------------------- */
 void Euler_angles2direction(double alpha, double beta,
-						    Matrix1D<double> &v)
+                            Matrix1D<double> &v)
 {
     double ca, sa, cb, sb;
     double sc, ss;

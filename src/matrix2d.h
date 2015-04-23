@@ -119,7 +119,7 @@
  *     return a.sum();
  * }
  * @endcode
- * 	TODO: remove this from the code.... DONT USE IT ANY FURTHER....
+ *  TODO: remove this from the code.... DONT USE IT ANY FURTHER....
  */
 #define M2x2_BY_V2x1(a, M, b) { \
         spduptmp0 = MAT_ELEM(M, 0, 0) * XX(b) + MAT_ELEM(M, 0, 1) * YY(b); \
@@ -148,7 +148,7 @@
  *     return a.sum();
  * }
  * @endcode
- * 	TODO: remove this from the code.... DONT USE IT ANY FURTHER....
+ *  TODO: remove this from the code.... DONT USE IT ANY FURTHER....
  */
 #define M3x3_BY_V3x1(a, M, b) { \
         spduptmp0 = MAT_ELEM(M, 0, 0) * XX(b) + MAT_ELEM(M, 0, 1) * YY(b) + MAT_ELEM(M, 0, 2) \
@@ -186,7 +186,7 @@ void svbksb(Matrix2D< double >& u,
 
 template<typename T>
 void solve(const Matrix2D<T>& A,
-		   const Matrix1D<T>& b,
+           const Matrix1D<T>& b,
            Matrix1D< double >& result,
            double tolerance);
 
@@ -733,7 +733,7 @@ public:
         for (int i = 0; i < mdimy; i++)
              for (int j = 0; j < mdimx; j++)
                  if (ABS( (*this)(i,j) ) < accuracy)
-                	 (*this)(i,j) = 0.;
+                     (*this)(i,j) = 0.;
     }
 
     /// @name Utilities for Matrix2D
@@ -1154,72 +1154,72 @@ public:
 
         if (mdimx == 0 || mdimy == 0)
         {
-        	REPORT_ERROR("Inverse: Matrix is empty");
+            REPORT_ERROR("Inverse: Matrix is empty");
         }
         // Initialise output
         result.initZeros(mdimx, mdimy);
 
         if (mdimx == 3 && mdimy == 3)
         {
-        	MAT_ELEM(result, 0, 0) =   MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 1, 1)-MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 1, 2);
-        	MAT_ELEM(result, 0, 1) = -(MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 0, 1)-MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 0, 2));
-        	MAT_ELEM(result, 0, 2) =   MAT_ELEM((*this), 1, 2)*MAT_ELEM((*this), 0, 1)-MAT_ELEM((*this), 1, 1)*MAT_ELEM((*this), 0, 2);
-        	MAT_ELEM(result, 1, 0) = -(MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 1, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 1, 2));
-        	MAT_ELEM(result, 1, 1) =   MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 0, 2);
-        	MAT_ELEM(result, 1, 2) = -(MAT_ELEM((*this), 1, 2)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 1, 0)*MAT_ELEM((*this), 0, 2));
-        	MAT_ELEM(result, 2, 0) =   MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 1, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 1, 1);
-        	MAT_ELEM(result, 2, 1) = -(MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 0, 1));
-        	MAT_ELEM(result, 2, 2) =   MAT_ELEM((*this), 1, 1)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 1, 0)*MAT_ELEM((*this), 0, 1);
-        	double tmp = MAT_ELEM((*this), 0, 0) * MAT_ELEM(result, 0, 0) +
-        			     MAT_ELEM((*this), 1, 0) * MAT_ELEM(result, 0, 1) +
-        			     MAT_ELEM((*this), 2, 0) * MAT_ELEM(result, 0, 2);
-        	result /= tmp;
+            MAT_ELEM(result, 0, 0) =   MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 1, 1)-MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 1, 2);
+            MAT_ELEM(result, 0, 1) = -(MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 0, 1)-MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 0, 2));
+            MAT_ELEM(result, 0, 2) =   MAT_ELEM((*this), 1, 2)*MAT_ELEM((*this), 0, 1)-MAT_ELEM((*this), 1, 1)*MAT_ELEM((*this), 0, 2);
+            MAT_ELEM(result, 1, 0) = -(MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 1, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 1, 2));
+            MAT_ELEM(result, 1, 1) =   MAT_ELEM((*this), 2, 2)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 0, 2);
+            MAT_ELEM(result, 1, 2) = -(MAT_ELEM((*this), 1, 2)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 1, 0)*MAT_ELEM((*this), 0, 2));
+            MAT_ELEM(result, 2, 0) =   MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 1, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 1, 1);
+            MAT_ELEM(result, 2, 1) = -(MAT_ELEM((*this), 2, 1)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 2, 0)*MAT_ELEM((*this), 0, 1));
+            MAT_ELEM(result, 2, 2) =   MAT_ELEM((*this), 1, 1)*MAT_ELEM((*this), 0, 0)-MAT_ELEM((*this), 1, 0)*MAT_ELEM((*this), 0, 1);
+            double tmp = MAT_ELEM((*this), 0, 0) * MAT_ELEM(result, 0, 0) +
+                         MAT_ELEM((*this), 1, 0) * MAT_ELEM(result, 0, 1) +
+                         MAT_ELEM((*this), 2, 0) * MAT_ELEM(result, 0, 2);
+            result /= tmp;
         }
         else if (mdimx == 2 && mdimy == 2)
         {
-        	MAT_ELEM(result, 0, 0) = MAT_ELEM((*this), 1, 1);
-        	MAT_ELEM(result, 0, 1) = -MAT_ELEM((*this), 0, 1);
-        	MAT_ELEM(result, 1, 0) = -MAT_ELEM((*this), 1, 0);
-        	MAT_ELEM(result, 1, 1) =  MAT_ELEM((*this), 0, 0);
-        	double tmp = MAT_ELEM((*this), 0, 0) * MAT_ELEM((*this), 1, 1) -
-					     MAT_ELEM((*this), 0, 1) * MAT_ELEM((*this), 1, 0);
-        	result /= tmp;
+            MAT_ELEM(result, 0, 0) = MAT_ELEM((*this), 1, 1);
+            MAT_ELEM(result, 0, 1) = -MAT_ELEM((*this), 0, 1);
+            MAT_ELEM(result, 1, 0) = -MAT_ELEM((*this), 1, 0);
+            MAT_ELEM(result, 1, 1) =  MAT_ELEM((*this), 0, 0);
+            double tmp = MAT_ELEM((*this), 0, 0) * MAT_ELEM((*this), 1, 1) -
+                         MAT_ELEM((*this), 0, 1) * MAT_ELEM((*this), 1, 0);
+            result /= tmp;
         }
         else
         {
 
-			// Perform SVD decomposition
-			Matrix2D< double > u, v;
-			Matrix1D< double > w;
-			svdcmp(*this, u, w, v); // *this = U * W * V^t
+            // Perform SVD decomposition
+            Matrix2D< double > u, v;
+            Matrix1D< double > w;
+            svdcmp(*this, u, w, v); // *this = U * W * V^t
 
-			double tol = computeMax() * XMIPP_MAX(mdimx, mdimy) * 1e-14;
+            double tol = computeMax() * XMIPP_MAX(mdimx, mdimy) * 1e-14;
 
-			// Compute W^-1
-			bool invertible = false;
-			FOR_ALL_ELEMENTS_IN_MATRIX1D(w)
-			{
-				if (ABS(VEC_ELEM(w,i)) > tol)
-				{
-					VEC_ELEM(w,i) = 1.0 / VEC_ELEM(w,i);
-					invertible = true;
-				}
-				else
-					VEC_ELEM(w,i) = 0.0;
-			}
+            // Compute W^-1
+            bool invertible = false;
+            FOR_ALL_ELEMENTS_IN_MATRIX1D(w)
+            {
+                if (ABS(VEC_ELEM(w,i)) > tol)
+                {
+                    VEC_ELEM(w,i) = 1.0 / VEC_ELEM(w,i);
+                    invertible = true;
+                }
+                else
+                    VEC_ELEM(w,i) = 0.0;
+            }
 
-			if (!invertible)
-				return;
+            if (!invertible)
+                return;
 
-			// Compute V*W^-1
-			FOR_ALL_ELEMENTS_IN_MATRIX2D(v)
-			MAT_ELEM(v,i,j) *= VEC_ELEM(w,j);
+            // Compute V*W^-1
+            FOR_ALL_ELEMENTS_IN_MATRIX2D(v)
+            MAT_ELEM(v,i,j) *= VEC_ELEM(w,j);
 
-			// Compute Inverse
-			for (int i = 0; i < mdimx; i++)
-				for (int j = 0; j < mdimy; j++)
-					for (int k = 0; k < mdimx; k++)
-						MAT_ELEM(result,i,j) += (T) MAT_ELEM(v,i,k) * MAT_ELEM(u,j,k);
+            // Compute Inverse
+            for (int i = 0; i < mdimx; i++)
+                for (int j = 0; j < mdimy; j++)
+                    for (int k = 0; k < mdimx; k++)
+                        MAT_ELEM(result,i,j) += (T) MAT_ELEM(v,i,k) * MAT_ELEM(u,j,k);
 
        }
 
@@ -1404,65 +1404,65 @@ void solve(const Matrix2D<T>& A, const Matrix2D<T>& b, Matrix2D<T>& result)
 /** Least-squares rigid transformation between two sets of 3D coordinates
  *
 double lsq_rigid_body_transformation(std::vector<Matrix1D<double> > &set1, std::vector<Matrix1D<double> > &set2,
-		Matrix2D<double> &Rot, Matrix1D<double> &trans)
+        Matrix2D<double> &Rot, Matrix1D<double> &trans)
 {
-	Matrix2D<double> A;
-	Matrix1D<double> avg1, avg2;
+    Matrix2D<double> A;
+    Matrix1D<double> avg1, avg2;
 
-	if (set1.size() != set2.size())
-		REPORT_ERROR("lsq_rigid_body_transformation ERROR: unequal set size");
+    if (set1.size() != set2.size())
+        REPORT_ERROR("lsq_rigid_body_transformation ERROR: unequal set size");
 
-	// Calculate average of set1 and set2
-	avg1 = vectorR3(0., 0., 0.);
-	avg2 = vectorR3(0., 0., 0.);
-	for (int i = 0; i < set1.size(); i++)
-	{
-		if (set1[i].vdim != 3)
-			REPORT_ERROR("lsq_rigid_body_transformation ERROR: not a 3-point set1");
-		if (set2[i].vdim != 3)
-			REPORT_ERROR("lsq_rigid_body_transformation ERROR: not a 3-point set2");
-		avg1 += set1[i];
-		avg2 += set2[i];
-	}
-	avg1 /= (double)set1.size();
-	avg2 /= (double)set1.size();
+    // Calculate average of set1 and set2
+    avg1 = vectorR3(0., 0., 0.);
+    avg2 = vectorR3(0., 0., 0.);
+    for (int i = 0; i < set1.size(); i++)
+    {
+        if (set1[i].vdim != 3)
+            REPORT_ERROR("lsq_rigid_body_transformation ERROR: not a 3-point set1");
+        if (set2[i].vdim != 3)
+            REPORT_ERROR("lsq_rigid_body_transformation ERROR: not a 3-point set2");
+        avg1 += set1[i];
+        avg2 += set2[i];
+    }
+    avg1 /= (double)set1.size();
+    avg2 /= (double)set1.size();
 
-	A.initZeros(3, 3);
-	Rot.initZeros(4,4);
-	for (int i = 0; i < set1.size(); i++)
-	{
-		// fill A
-		A(0, 0) += (XX(set1[i]) - XX(avg1)) * (XX(set2[i]) - XX(avg2));
-		A(0, 1) += (XX(set1[i]) - XX(avg1)) * (YY(set2[i]) - YY(avg2));
-		A(0, 2) += (XX(set1[i]) - XX(avg1)) * (ZZ(set2[i]) - ZZ(avg2));
-		A(1, 0) += (YY(set1[i]) - YY(avg1)) * (XX(set2[i]) - XX(avg2));
-		A(1, 1) += (YY(set1[i]) - YY(avg1)) * (YY(set2[i]) - YY(avg2));
-		A(1, 2) += (YY(set1[i]) - YY(avg1)) * (ZZ(set2[i]) - ZZ(avg2));
-		A(2, 0) += (ZZ(set1[i]) - ZZ(avg1)) * (XX(set2[i]) - XX(avg2));
-		A(2, 1) += (ZZ(set1[i]) - ZZ(avg1)) * (YY(set2[i]) - YY(avg2));
-		A(2, 2) += (ZZ(set1[i]) - ZZ(avg1)) * (ZZ(set2[i]) - ZZ(avg2));
-	}
+    A.initZeros(3, 3);
+    Rot.initZeros(4,4);
+    for (int i = 0; i < set1.size(); i++)
+    {
+        // fill A
+        A(0, 0) += (XX(set1[i]) - XX(avg1)) * (XX(set2[i]) - XX(avg2));
+        A(0, 1) += (XX(set1[i]) - XX(avg1)) * (YY(set2[i]) - YY(avg2));
+        A(0, 2) += (XX(set1[i]) - XX(avg1)) * (ZZ(set2[i]) - ZZ(avg2));
+        A(1, 0) += (YY(set1[i]) - YY(avg1)) * (XX(set2[i]) - XX(avg2));
+        A(1, 1) += (YY(set1[i]) - YY(avg1)) * (YY(set2[i]) - YY(avg2));
+        A(1, 2) += (YY(set1[i]) - YY(avg1)) * (ZZ(set2[i]) - ZZ(avg2));
+        A(2, 0) += (ZZ(set1[i]) - ZZ(avg1)) * (XX(set2[i]) - XX(avg2));
+        A(2, 1) += (ZZ(set1[i]) - ZZ(avg1)) * (YY(set2[i]) - YY(avg2));
+        A(2, 2) += (ZZ(set1[i]) - ZZ(avg1)) * (ZZ(set2[i]) - ZZ(avg2));
+    }
 
-	Matrix2D< double > U, V;
-	Matrix1D< double > w;
+    Matrix2D< double > U, V;
+    Matrix1D< double > w;
 
-	// TODO: check inverse, transpose etc etc!!!
+    // TODO: check inverse, transpose etc etc!!!
 
-	// Optimal rotation
-	svdcmp(A, U, w, V);
-	Rot = V.transpose() * U;
+    // Optimal rotation
+    svdcmp(A, U, w, V);
+    Rot = V.transpose() * U;
 
-	// Optimal translation
-	trans = avg1 - Rot * avg2;
+    // Optimal translation
+    trans = avg1 - Rot * avg2;
 
-	// return the squared difference term
-	double error = 0.;
-	for (int i = 0; i < set1.size(); i++)
-	{
-		error += (Rot * set2[i] + trans - set1[i]).sum2();
-	}
+    // return the squared difference term
+    double error = 0.;
+    for (int i = 0; i < set1.size(); i++)
+    {
+        error += (Rot * set2[i] + trans - set1[i]).sum2();
+    }
 
-	return error;
+    return error;
 
 }
 */

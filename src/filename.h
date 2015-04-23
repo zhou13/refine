@@ -119,7 +119,7 @@ public:
     /** Assignment constructor
      */
     FileName& operator=(const FileName& op){
-    	return (FileName&) std::string::operator=(op);
+        return (FileName&) std::string::operator=(op);
     }
 
     /** Constructor from root, number and extension

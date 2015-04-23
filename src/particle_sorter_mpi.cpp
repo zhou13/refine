@@ -33,59 +33,59 @@ void ParticleSorterMpi::read(int argc, char **argv)
     // Possibly also read parallelisation-dependent variables here
 
     // Print out MPI info
-	printMpiNodesMachineNames(*node);
+    printMpiNodesMachineNames(*node);
 
 
 }
 void ParticleSorterMpi::run()
 {
 
-	int total_nr_images = MDin.numberOfObjects();
-	features.resize(total_nr_images, NR_FEATURES);
+    int total_nr_images = MDin.numberOfObjects();
+    features.resize(total_nr_images, NR_FEATURES);
 
-	// Each node does part of the work
-	long int my_first_image, my_last_image, my_nr_images;
-	divide_equally(total_nr_images, node->size, node->rank, my_first_image, my_last_image);
-	my_nr_images = my_last_image - my_first_image + 1;
+    // Each node does part of the work
+    long int my_first_image, my_last_image, my_nr_images;
+    divide_equally(total_nr_images, node->size, node->rank, my_first_image, my_last_image);
+    my_nr_images = my_last_image - my_first_image + 1;
 
-	int barstep;
-	if (verb > 0)
-	{
-		std::cout << "Calculating sorting features for all input particles..." << std::endl;
-		init_progress_bar(my_nr_images);
-		barstep = XMIPP_MAX(1, my_nr_images/ 60);
-	}
+    int barstep;
+    if (verb > 0)
+    {
+        std::cout << "Calculating sorting features for all input particles..." << std::endl;
+        init_progress_bar(my_nr_images);
+        barstep = XMIPP_MAX(1, my_nr_images/ 60);
+    }
 
-	long int ipart = 0;
-	FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDin)
-	{
+    long int ipart = 0;
+    FOR_ALL_OBJECTS_IN_METADATA_TABLE(MDin)
+    {
 
-		if (ipart >= my_first_image && ipart <= my_last_image)
-		{
-			if (verb > 0 && ipart % barstep == 0)
-				progress_bar(ipart);
+        if (ipart >= my_first_image && ipart <= my_last_image)
+        {
+            if (verb > 0 && ipart % barstep == 0)
+                progress_bar(ipart);
 
-			calculateFeaturesOneParticle(ipart);
+            calculateFeaturesOneParticle(ipart);
 
-		}
-		ipart++;
-	}
+        }
+        ipart++;
+    }
 
-	if (verb > 0)
-		progress_bar(my_nr_images);
+    if (verb > 0)
+        progress_bar(my_nr_images);
 
-	// Combine results from all nodes
-	MultidimArray<double> allnodes_features;
-	allnodes_features.resize(features);
-	MPI_Allreduce(MULTIDIM_ARRAY(features), MULTIDIM_ARRAY(allnodes_features), MULTIDIM_SIZE(features), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	features = allnodes_features;
+    // Combine results from all nodes
+    MultidimArray<double> allnodes_features;
+    allnodes_features.resize(features);
+    MPI_Allreduce(MULTIDIM_ARRAY(features), MULTIDIM_ARRAY(allnodes_features), MULTIDIM_SIZE(features), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    features = allnodes_features;
 
-	// Only the master writes out files
-	if (verb > 0)
-	{
-		normaliseFeatures();
+    // Only the master writes out files
+    if (verb > 0)
+    {
+        normaliseFeatures();
 
-		writeFeatures();
-	}
+        writeFeatures();
+    }
 
 }

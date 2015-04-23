@@ -123,9 +123,9 @@ int systype()
 
     int type = UNKNOWN_SYSTEM;
     if ( itest[0] == 1784834080 && fabs(ftest[0] - 6.84272e+25) < 1e+21 )
-    	type = BIGIEEE;
+        type = BIGIEEE;
     if ( itest[0] == 543711850 && fabs(ftest[0] - 1.96837e-19) < 1e-23 )
-    	type = LITTLEIEEE;
+        type = LITTLEIEEE;
 
     freeMemory(test, 12);
 
@@ -146,7 +146,7 @@ int readMRC(long int img_select, bool isStack=false)
 
     MRChead*        header = (MRChead *) askMemory(sizeof(MRChead));
     if ( fread( header, MRCSIZE, 1, fimg ) < 1 )
-    	REPORT_ERROR("rwMRC: error in reading header ...");
+        REPORT_ERROR("rwMRC: error in reading header ...");
 
     // Determine byte order and swap bytes if from little-endian machine
     swap = 0;
@@ -222,10 +222,10 @@ int readMRC(long int img_select, bool isStack=false)
         datatype = Float;
         break;
     case 3:
-    	REPORT_ERROR("readMRC: only real-space images may be read into RELION.");
-    	break;
+        REPORT_ERROR("readMRC: only real-space images may be read into RELION.");
+        break;
     case 4:
-    	REPORT_ERROR("readMRC: only real-space images may be read into RELION.");
+        REPORT_ERROR("readMRC: only real-space images may be read into RELION.");
         break;
     default:
         datatype = UChar;
@@ -248,8 +248,8 @@ int readMRC(long int img_select, bool isStack=false)
 
    if (isStack && dataflag<0)   // Don't read the individual header and the data if not necessary
    {
-	   freeMemory(header, sizeof(MRChead));
-	   return 0;
+       freeMemory(header, sizeof(MRChead));
+       return 0;
    }
 
     //#define DEBUG
@@ -275,24 +275,24 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
     strncpy(header->map, "MAP ", 4);
     // Set CCP4 machine stamp
     switch ( systype() )
-	{
-		case BIGIEEE:
-			header->machst[0] = header->machst[1] = 17;
-			break;
-		case LITTLEIEEE:
-			header->machst[0] = 68;
-			header->machst[1] = 65;
-			break;
-		case LITTLEVAX:
-			header->machst[0] = 34;
-			header->machst[1] = 65;
-			break;
-		case UNKNOWN_SYSTEM:
-			REPORT_ERROR("Unkown system type in writeMRC machine stamp determination.");
-			break;
-		default:
-			break;
-	}
+    {
+        case BIGIEEE:
+            header->machst[0] = header->machst[1] = 17;
+            break;
+        case LITTLEIEEE:
+            header->machst[0] = 68;
+            header->machst[1] = 65;
+            break;
+        case LITTLEVAX:
+            header->machst[0] = 34;
+            header->machst[1] = 65;
+            break;
+        case UNKNOWN_SYSTEM:
+            REPORT_ERROR("Unkown system type in writeMRC machine stamp determination.");
+            break;
+        default:
+            break;
+    }
 
     // FIXME TO BE DONE WITH rwCCP4!!
     //set_CCP4_machine_stamp(header->machst);
@@ -315,9 +315,9 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
     header->nx = Xdim;
     header->ny = Ydim;
     if (isStack)
-    	header->nz = Ndim;
+        header->nz = Ndim;
     else
-    	header->nz = Zdim;
+        header->nz = Zdim;
 
     // Convert T to datatype
     if ( typeid(T) == typeid(double) ||
@@ -352,30 +352,30 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
         if(MDMainHeader.getValue(EMDL_IMAGE_STATS_MIN, aux))
             header->amin  = (float)aux;
         else
-        	header->amin  = (float)data.computeMin();
+            header->amin  = (float)data.computeMin();
 
         if(MDMainHeader.getValue(EMDL_IMAGE_STATS_MAX, aux))
             header->amax  = (float)aux;
         else
-        	header->amax  = (float)data.computeMax();
+            header->amax  = (float)data.computeMax();
 
         if(MDMainHeader.getValue(EMDL_IMAGE_STATS_AVG, aux))
             header->amean = (float)aux;
         else
-        	header->amean = (float)data.computeAvg();
+            header->amean = (float)data.computeAvg();
 
         if(MDMainHeader.getValue(EMDL_IMAGE_STATS_STDDEV, aux))
             header->arms  = (float)aux;
         else
-        	header->arms  = (float)data.computeStddev();
+            header->arms  = (float)data.computeStddev();
 
         if(MDMainHeader.getValue(EMDL_ORIENT_ORIGIN_X, aux))
             header->nxStart = (int)(aux-0.5);
 
         if (MDMainHeader.getValue(EMDL_IMAGE_SAMPLINGRATE_X,aux2))//header is init to zero
         {
-        	header->xOrigin = (float)(aux*aux2);
-        	header->a = (float)aux2*header->nx;
+            header->xOrigin = (float)(aux*aux2);
+            header->a = (float)aux2*header->nx;
         }
 
         if (MDMainHeader.getValue(EMDL_ORIENT_ORIGIN_Y, aux))
@@ -383,8 +383,8 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
 
         if (MDMainHeader.getValue(EMDL_IMAGE_SAMPLINGRATE_Y,aux2))//header is init to zero
         {
-         	header->yOrigin = (float)(aux*aux2);
-         	header->b = (float)aux2*header->ny;
+            header->yOrigin = (float)(aux*aux2);
+            header->b = (float)aux2*header->ny;
         }
 
         if (MDMainHeader.getValue(EMDL_ORIENT_ORIGIN_Z, aux))
@@ -392,8 +392,8 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
 
         if (MDMainHeader.getValue(EMDL_IMAGE_SAMPLINGRATE_Z,aux2))//header is init to zero
         {
-        	header->zOrigin = (float)(aux*aux2);
-        	header->c = (float)aux2*header->nz;
+            header->zOrigin = (float)(aux*aux2);
+            header->c = (float)aux2*header->nz;
         }
 
     }
@@ -444,7 +444,7 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
 
     if ( NSIZE(data) == 1 && mode==WRITE_OVERWRITE)
     {
-    	castPage2Datatype(MULTIDIM_ARRAY(data), fdata, Float, datasize_n);
+        castPage2Datatype(MULTIDIM_ARRAY(data), fdata, Float, datasize_n);
         fwrite( fdata, datasize, 1, fimg );
     }
     else
@@ -453,11 +453,11 @@ int writeMRC(long int img_select, bool isStack=false, int mode=WRITE_OVERWRITE)
             fseek( fimg, 0, SEEK_END);
         else if(mode==WRITE_REPLACE)
         {
-        	fseek( fimg, offset + (datasize)*img_select, SEEK_SET);
+            fseek( fimg, offset + (datasize)*img_select, SEEK_SET);
         }
         for ( size_t i =imgStart; i<imgEnd; i++ )
         {
-        	castPage2Datatype(MULTIDIM_ARRAY(data) + i*datasize_n, fdata, Float, datasize_n);
+            castPage2Datatype(MULTIDIM_ARRAY(data) + i*datasize_n, fdata, Float, datasize_n);
             fwrite( fdata, datasize, 1, fimg );
         }
     }

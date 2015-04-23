@@ -108,7 +108,7 @@ public:
         for (std::map<EMDLabel, void *>::iterator it = values.begin();
              it != values.end(); ++it)
         {
-        	if (EMDL::isDouble(it->first))
+            if (EMDL::isDouble(it->first))
                 delete (double*)it->second;
             else if (EMDL::isInt(it->first))
                 delete (int*)it->second;
@@ -121,7 +121,7 @@ public:
             else
                 REPORT_ERROR("Unrecognised label type in MetaDataContainer clear");
         }
-    	values.clear();
+        values.clear();
     }
 
     /** Get a value for a given name.

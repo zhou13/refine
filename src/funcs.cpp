@@ -57,39 +57,39 @@
 
 void fitStraightLine(std::vector<fit_point2D> &points, double &slope, double &intercept, double &corr_coeff)
 {
-	// From: http://mathworld.wolfram.com/LeastSquaresFitting.html
-	// ss_xx = Sum_i x_i^2 - n ave_x^2
-	// ss_yy = Sum_i y_i^2 - n ave_y^2
-	// ss_xy = Sum_i x_i * y_i - n ave_x n_ave_y
-	// slope = xx_xy / ss_xx
-	// intercept = ave_y - slope * ave_x
-	// corr_coeff = ss_xy^2 / (ss_xx * ss_yy)
-	double ss_xy = 0.;
-	double ss_xx = 0.;
-	double ss_yy = 0.;
-	double ave_x = 0.;
-	double ave_y = 0.;
-	double sum_w = 0.;
-	for (int i = 0; i < points.size(); i++)
-	{
-		ave_x += points[i].w * points[i].x;
-		ave_y += points[i].w * points[i].y;
-		sum_w += points[i].w;
-		ss_xx += points[i].w * points[i].x * points[i].x;
-		ss_yy += points[i].w * points[i].y * points[i].y;
-		ss_xy += points[i].w * points[i].x * points[i].y;
-	}
-	ave_x /= sum_w;
-	ave_y /= sum_w;
-	ss_xx -= sum_w * ave_x * ave_x;
-	ss_yy -= sum_w * ave_y * ave_y;
-	ss_xy -= sum_w * ave_x * ave_y;
+    // From: http://mathworld.wolfram.com/LeastSquaresFitting.html
+    // ss_xx = Sum_i x_i^2 - n ave_x^2
+    // ss_yy = Sum_i y_i^2 - n ave_y^2
+    // ss_xy = Sum_i x_i * y_i - n ave_x n_ave_y
+    // slope = xx_xy / ss_xx
+    // intercept = ave_y - slope * ave_x
+    // corr_coeff = ss_xy^2 / (ss_xx * ss_yy)
+    double ss_xy = 0.;
+    double ss_xx = 0.;
+    double ss_yy = 0.;
+    double ave_x = 0.;
+    double ave_y = 0.;
+    double sum_w = 0.;
+    for (int i = 0; i < points.size(); i++)
+    {
+        ave_x += points[i].w * points[i].x;
+        ave_y += points[i].w * points[i].y;
+        sum_w += points[i].w;
+        ss_xx += points[i].w * points[i].x * points[i].x;
+        ss_yy += points[i].w * points[i].y * points[i].y;
+        ss_xy += points[i].w * points[i].x * points[i].y;
+    }
+    ave_x /= sum_w;
+    ave_y /= sum_w;
+    ss_xx -= sum_w * ave_x * ave_x;
+    ss_yy -= sum_w * ave_y * ave_y;
+    ss_xy -= sum_w * ave_x * ave_y;
 
-	//std::cerr << " ss_xx= " << ss_xx << " ss_yy= " << ss_yy << " ss_xy= " << ss_xy << std::endl;
-	//std::cerr << " sum_w= " << sum_w << " ave_x= " << ave_x << " ave_y= " << ave_y << std::endl;
-	slope = ss_xy / ss_xx;
-	intercept = ave_y - slope * ave_x;
-	corr_coeff = ss_xy * ss_xy / (ss_xx * ss_yy);
+    //std::cerr << " ss_xx= " << ss_xx << " ss_yy= " << ss_yy << " ss_xy= " << ss_xy << std::endl;
+    //std::cerr << " sum_w= " << sum_w << " ave_x= " << ave_x << " ave_y= " << ave_y << std::endl;
+    slope = ss_xy / ss_xx;
+    intercept = ave_y - slope * ave_x;
+    corr_coeff = ss_xy * ss_xy / (ss_xx * ss_yy);
 }
 
 /* Value of a blob --------------------------------------------------------- */
@@ -203,7 +203,7 @@ double kaiser_Fourier_value(double w, double a, double alpha, int m)
                     / (bessi0(alpha)*pow(sigma, 1.5));
     }
     else
-    	REPORT_ERROR("m out of range in kaiser_Fourier_value()");
+        REPORT_ERROR("m out of range in kaiser_Fourier_value()");
 }
 /* Volume integral of a blob ----------------------------------------------- */
 double  basvolume(double a, double alpha, int m, int n)

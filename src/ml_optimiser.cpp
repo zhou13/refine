@@ -1418,7 +1418,7 @@ void MlOptimiser::iterate()
     iterateWrapUp();
 }
 
-void MlOptimiser::expectation()
+void MlOptimiser:: expectation()
 {
 
 //#define DEBUG_EXP
@@ -1903,11 +1903,20 @@ void MlOptimiser::maximization()
     {
         if (mymodel.pdf_class[iclass] > 0.)
         {
-            (wsum_model.BPref[iclass]).reconstruct(mymodel.Iref[iclass], gridding_nr_iter, do_map,
-                    mymodel.tau2_fudge_factor, mymodel.tau2_class[iclass], mymodel.sigma2_class[iclass],
-                    mymodel.data_vs_prior_class[iclass], mymodel.fsc_halves_class[iclass], wsum_model.pdf_class[iclass],
-                    false, false, nr_threads, minres_map);
-
+            (wsum_model.BPref[iclass]).reconstruct(
+                        mymodel.Iref[iclass],
+                        gridding_nr_iter,
+                        do_map,
+                        mymodel.tau2_fudge_factor,
+                        mymodel.tau2_class[iclass],
+                        mymodel.sigma2_class[iclass],
+                        mymodel.data_vs_prior_class[iclass],
+                        mymodel.fsc_halves_class[iclass],
+                        wsum_model.pdf_class[iclass],
+                        false,
+                        false,
+                        nr_threads,
+                        minres_map);
         }
         else
         {
@@ -3565,7 +3574,6 @@ void MlOptimiser::getAllSquaredDifferences()
     for (int n = 0; n < exp_nr_particles; n++)
         exp_min_diff2[n] = 99.e99;
 
-    // Use pre-sized vectors instead of push_backs!!
     exp_local_Fimgs_shifted.clear();
     exp_local_Fimgs_shifted.resize(exp_nr_images * sampling.NrTranslationalSamplings(exp_current_oversampling));
     exp_local_Fimgs_shifted_nomask.clear();
@@ -4159,8 +4167,17 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
 
     // Make local copies of weighted sums (excepts BPrefs, which are too big)
     // so that there are not too many mutex locks below
-    std::vector<MultidimArray<double> > thr_wsum_sigma2_noise, thr_wsum_scale_correction_XA, thr_wsum_scale_correction_AA, thr_wsum_pdf_direction;
-    std::vector<double> thr_wsum_norm_correction, thr_sumw_group, thr_wsum_pdf_class, thr_wsum_prior_offsetx_class, thr_wsum_prior_offsety_class, thr_max_weight;
+    std::vector<MultidimArray<double> > thr_wsum_sigma2_noise;
+    std::vector<MultidimArray<double> > thr_wsum_scale_correction_XA;
+    std::vector<MultidimArray<double> > thr_wsum_scale_correction_AA;
+    std::vector<MultidimArray<double> > thr_wsum_pdf_direction;
+
+    std::vector<double> thr_wsum_norm_correction;
+    std::vector<double> thr_sumw_group;
+    std::vector<double> thr_wsum_pdf_class;
+    std::vector<double> thr_wsum_prior_offsetx_class;
+    std::vector<double> thr_wsum_prior_offsety_class;
+    std::vector<double> thr_max_weight;
     double thr_wsum_sigma2_offset;
     MultidimArray<double> thr_metadata, zeroArray;
 
@@ -4263,24 +4280,9 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                         for (long int i = 0; i < mydata.ori_particles[ori_part_id].particles_id.size(); i++, ipart++)
                         {
                             long int part_id = mydata.ori_particles[ori_part_id].particles_id[i];
-#ifdef DEBUG_CHECKSIZES
-                            if (ipart >= exp_starting_image_no.size())
-                            {
-                                std::cerr<< "ipart= "<<ipart<<" starting_image_no.size()= "<< exp_starting_image_no.size() <<std::endl;
-                                REPORT_ERROR("ipart >= starting_image_no.size()");
-                            }
-#endif
                             // Which number was this image in the combined array of iseries and part_idpart_id
                             long int my_image_no = exp_starting_image_no[ipart] + exp_iseries;
                             int group_id = mydata.getGroupId(part_id, exp_iseries);
-
-#ifdef DEBUG_CHECKSIZES
-                            if (group_id >= mymodel.nr_groups)
-                            {
-                                std::cerr<< "group_id= "<<group_id<<" ml_model.nr_groups= "<< mymodel.nr_groups <<std::endl;
-                                REPORT_ERROR("group_id >= ml_model.nr_groups");
-                            }
-#endif
 
                             if (!do_skip_maximization)
                             {
@@ -4348,41 +4350,10 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
 
                                 for (long int iover_trans = 0; iover_trans < exp_nr_oversampled_trans; iover_trans++)
                                 {
-
-#ifdef DEBUG_CHECKSIZES
-                                    if (iover_trans >= oversampled_translations.size())
-                                    {
-                                        std::cerr<< "iover_trans= "<<iover_trans<<" oversampled_translations.size()= "<< oversampled_translations.size() <<std::endl;
-                                        REPORT_ERROR("iover_trans >= oversampled_translations.size()");
-                                    }
-#endif
-
                                     // Only deal with this sampling point if its weight was significant
                                     long int ihidden_over = ihidden * exp_nr_oversampled_trans * exp_nr_oversampled_rot +
                                             iover_rot * exp_nr_oversampled_trans + iover_trans;
 
-#ifdef DEBUG_CHECKSIZES
-                                    if (ihidden_over >= XSIZE(exp_Mweight))
-                                    {
-                                        std::cerr<< "ihidden_over= "<<ihidden_over<<" XSIZE(exp_Mweight)= "<< XSIZE(exp_Mweight) <<std::endl;
-                                        REPORT_ERROR("ihidden_over >= XSIZE(exp_Mweight)");
-                                    }
-                                    if (ipart >= exp_significant_weight.size())
-                                    {
-                                        std::cerr<< "ipart= "<<ipart<<" exp_significant_weight.size()= "<< exp_significant_weight.size() <<std::endl;
-                                        REPORT_ERROR("ipart >= significant_weight.size()");
-                                    }
-                                    if (ipart >= exp_max_weight.size())
-                                    {
-                                        std::cerr<< "ipart= "<<ipart<<" exp_max_weight.size()= "<< exp_max_weight.size() <<std::endl;
-                                        REPORT_ERROR("ipart >= exp_max_weight.size()");
-                                    }
-                                    if (ipart >= exp_sum_weight.size())
-                                    {
-                                        std::cerr<< "ipart= "<<ipart<<" exp_max_weight.size()= "<< exp_sum_weight.size() <<std::endl;
-                                        REPORT_ERROR("ipart >= exp_sum_weight.size()");
-                                    }
-#endif
                                     double weight = DIRECT_A2D_ELEM(exp_Mweight, ipart, ihidden_over);
 
                                     // Only sum weights for non-zero weights
@@ -4430,18 +4401,6 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                                                 FOR_ALL_DIRECT_ELEMENTS_IN_MULTIDIMARRAY(Mresol_fine)
                                                 {
                                                     int ires = DIRECT_MULTIDIM_ELEM(Mresol_fine, n);
-#ifdef DEBUG_CHECKSIZES
-                                                    if (ires >= XSIZE(thr_wsum_scale_correction_XA[ipart]))
-                                                    {
-                                                        std::cerr<< "ires= "<<ires<<" XSIZE(thr_wsum_scale_correction_XA[ipart])= "<< XSIZE(thr_wsum_scale_correction_XA[ipart]) <<std::endl;
-                                                        REPORT_ERROR("ires >= XSIZE(thr_wsum_scale_correction_XA[ipart])");
-                                                    }
-                                                    if (ires >= XSIZE(thr_wsum_scale_correction_AA[ipart]))
-                                                    {
-                                                        std::cerr<< "ires= "<<ires<<" XSIZE(thr_wsum_scale_correction_AA[ipart])= "<< XSIZE(thr_wsum_scale_correction_AA[ipart]) <<std::endl;
-                                                        REPORT_ERROR("ires >= XSIZE(thr_wsum_scale_correction_AA[ipart])");
-                                                    }
-#endif
 
                                                     // Once the reference becomes strongly regularised one does no longer want to store XA and AA!
                                                     if (ires > -1 && DIRECT_A1D_ELEM(mymodel.data_vs_prior_class[exp_iclass], ires) > 3.)
@@ -4479,14 +4438,6 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                                                 // Store weighted sum2 of origin offsets (in Angstroms instead of pixels!!!)
                                                 thr_wsum_sigma2_offset += weight * ((exp_prior[my_image_no] - exp_old_offset[my_image_no] - oversampled_translations[iover_trans]).sum2());
                                             }
-
-#ifdef DEBUG_CHECKSIZES
-                                            if (idir >= XSIZE(thr_wsum_pdf_direction[exp_iclass]))
-                                            {
-                                                std::cerr<< "idir= "<<idir<<" XSIZE(thr_wsum_pdf_direction[exp_iclass])= "<< XSIZE(thr_wsum_pdf_direction[exp_iclass]) <<std::endl;
-                                                REPORT_ERROR("idir >= XSIZE(thr_wsum_pdf_direction[iclass])");
-                                            }
-#endif
 
                                             // Store weight for this direction of this class
                                             if (mymodel.orientational_prior_mode == NOPRIOR)

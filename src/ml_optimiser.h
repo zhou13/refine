@@ -409,24 +409,170 @@ public:
     int nr_threads, nr_threads_original;
 
     /** Some global variables that are only for thread visibility */
-    /// Taken from getAllSquaredDifferences
-    std::vector<MultidimArray<Complex > > exp_Fimgs, exp_Fimgs_nomask, exp_local_Fimgs_shifted, exp_local_Fimgs_shifted_nomask;
-    std::vector<MultidimArray<double> > exp_Fctfs, exp_local_Fctfs, exp_local_Minvsigma2s;
+    // You will saw a lot of "for" to for particles in original particles and
+    // iseries in particles.  But it seems that in many cases, the length of
+    // these loop is 0.
+
+    // Another things you may notice is that there are a lot of cross correlation
+    // in the source code.  But according to my knowledge, they are in fact the
+    // cosine similarity here.  Maybe cc represents cosine correlation? :(
+
+    // exp_Fimgs[local_image_id] =
+    //      Fourier-space image windowed to mymodel.current_size
+    //      with exp_old_offset translated, BeamTilt (what's that?) and soft-mask
+    std::vector<MultidimArray<Complex> > exp_Fimgs;
+
+    // exp_Fimgs_nomask[local_image_id] =
+    //      Fourier-space image windowed to mymodel.current_size
+    //      with exp_old_offset translated and BeamTilt (what's that?)
+    std::vector<MultidimArray<Complex> > exp_Fimgs_nomask;
+
+    // exp_local_Fimgs_shifted{,_nomask}[local_image_id][trans_samples]
+    //      = translation sampled image in Fourier space
+    std::vector<MultidimArray<Complex> > exp_local_Fimgs_shifted;
+    std::vector<MultidimArray<Complex> > exp_local_Fimgs_shifted_nomask;
+
+    // exp_Fctfs[local_image_id][fx,fy] is the CTF matrix in Fourier-space
+    std::vector<MultidimArray<double> > exp_Fctfs;
+
+    // exp_local_Fctfs is windowed exp_Fctfs
+    std::vector<MultidimArray<double> > exp_local_Fctfs;
+
+    // exp_local_Minvsigma2s[local_image_id][fx,fy] =
+    //    1 / (fudge * sigma_noise_{groud_id, shell(fx,fy)}^2)
+    //    where shell represents the resolution at point (fx, fy) = sqrt(fx^2+fy^2)
+    std::vector<MultidimArray<double> > exp_local_Minvsigma2s;
+
+    // This is called micrograph transformation matrix
+    // In the 2D alignment tutorial, it is identity matrix
     Matrix2D<double> exp_R_mic;
-    int exp_iseries, exp_iclass, exp_ipass, exp_iimage, exp_ipart, exp_current_image_size, exp_current_oversampling, exp_nr_ori_particles, exp_nr_particles, exp_nr_images;
-    long int exp_nr_oversampled_rot, exp_nr_oversampled_trans, exp_nr_rot, exp_nr_dir, exp_nr_psi, exp_nr_trans;
-    long int exp_part_id, exp_my_first_ori_particle, exp_my_last_ori_particle;
+
+    int exp_iseries;
+
+    // Loop in getAllSquaredDifferences
+    int exp_iclass;
+
+    // Current sampling pass (0 or 1)
+    // Looped in expectedSomeParticles
+    int exp_ipass;
+
+    int exp_iimage;
+    int exp_ipart;
+
+    // Another layer of image_size. When we do coarse sampling, we do can use
+    // resolution even lower than mymodel.current_size (for performance?)
+    int exp_current_image_size;
+
+    // Whether we are in the oversampling rounds (fine sampling rounds) now.
+    // It can be 0, 1, or 2
+    int exp_current_oversampling;
+
+    // Number of original particles that current threads need to process
+    int exp_nr_ori_particles;
+
+    // Number of particles that current threads need to process.
+    // In my environment it seems to be equal to exp_nr_ori_particles
+    int exp_nr_particles;
+
+    // Number of total image that current threads need to process.
+    // In my environment it seems to be equal to exp_nr_ori_particles
+    // The relationship seems to be
+    //    k1 * k2 * exp_nr_ori_particles = k1 * exp_nr_particles = exp_nr_images
+    int exp_nr_images;
+
+    // How many multiples of samples we need to use in rotation/transition.
+    long int exp_nr_oversampled_rot;
+    long int exp_nr_oversampled_trans;
+
+    // Number of (rot,tilt)-pair samples
+    long int exp_nr_dir;
+
+    // Number of psi samples
+    long int exp_nr_psi;
+
+    // Number of all rotation (rot, tilt, psi) samples
+    long int exp_nr_rot;
+
+    // Number of all transition samples
+    long int exp_nr_trans;
+
+    long int exp_part_id;
+
+    // Indeices of original particle that current threads need to process
+    long int exp_my_first_ori_particle, exp_my_last_ori_particle;
+
+    // exp_starting_image_no[local_particle_id] = local_image_id
     std::vector<int> exp_starting_image_no;
-    std::vector<long int> exp_ipart_to_part_id, exp_ipart_to_ori_part_id, exp_ipart_to_ori_part_nframe, exp_iimg_to_ipart;
-    std::vector<double> exp_highres_Xi2_imgs, exp_min_diff2, exp_local_sqrtXi2, exp_local_oldcc;
+
+    // exp_ipart_to_part_id[local_particle_id] = particle_id
+    // where local_particle_id exists because we divide particle into blocks
+    std::vector<long int> exp_ipart_to_part_id;
+
+    // exp_ipart_to_ori_part_id[local_particle_id] = original_particle_id
+    std::vector<long int> exp_ipart_to_ori_part_id;
+
+    // exp_ipart_to_ori_part_id[local_particle_id] = index of particle in the array of original particle
+    std::vector<long int> exp_ipart_to_ori_part_nframe;
+
+    // exp_iimg_to_ipart[local_image_id] = local_particle_id
+    std::vector<long int> exp_iimg_to_ipart;
+
+    // exp_highres_Xi2_imgs[local_image_id] = sum of power spectrum > current_size (which will be thrown away)
+    std::vector<double> exp_highres_Xi2_imgs;
+
+    // exp_min_diff2[local_particle_id] = the minimum square distance between
+    // the reference image and the sampled transformation for that particle
+    std::vector<double> exp_min_diff2;
+
+    // exp_local_sqrtXi2[local_image_id] = sqrt{\sum_i,j Fimg[i,j]^2}
+    std::vector<double> exp_local_sqrtXi2;
+
+    std::vector<double> exp_local_oldcc;
+
+    // In calculateSquaredDifference:
+    //   exp_Mweight[local_particle_id][class_samples_id] =
+    //       the square distance OR negative cosine similarity between
+    //       the reference image and the sampled transformation
+    //       normalized by the noise_sigma estimiation.
+    // In convertSquareDifferenceToWeight
+    //   exp_Mweight[local_particle_id][class_samples_id] =
+    //       prior probability of class_samples_id *
+    //       e^(-exp_Mweight[.][.] + exp_min_diff2[local_particle_id]);
     MultidimArray<double> exp_Mweight;
+
+    // exp_Mcoarse_significant[local_particle_id][class_samples_id] =
+    //     whether that samples's weight (in exp_Mweight) exceeds the
+    //     threashold (adaptive_fraction * exp_sum_weight[local_particle_id]
     MultidimArray<bool> exp_Mcoarse_significant;
-    // And from storeWeightedSums
-    std::vector<double> exp_sum_weight, exp_significant_weight, exp_max_weight;
-    std::vector<Matrix1D<double> > exp_old_offset, exp_prior;
+
+    // exp_sum_weight[local_particle_id] = \sum_c exp_Mweight[.][c];
+    std::vector<double> exp_sum_weight;
+
+    // Default to -1 in expectationSomeParticles(...)
+    std::vector<double> exp_significant_weight;
+
+    std::vector<double> exp_max_weight;
+
+    // exp_old_offset[local_image_id] = offset of image_id from last iteration
+    std::vector<Matrix1D<double> > exp_old_offset;
+    // exp_prior[local_image_id] = prior offset from metadata?
+    std::vector<Matrix1D<double> > exp_prior;
+
     std::vector<double> exp_wsum_norm_correction;
-    std::vector<MultidimArray<double> > exp_wsum_scale_correction_XA, exp_wsum_scale_correction_AA, exp_power_imgs;
-    MultidimArray<double> exp_metadata, exp_imagedata;
+    std::vector<MultidimArray<double> > exp_wsum_scale_correction_XA;
+    std::vector<MultidimArray<double> > exp_wsum_scale_correction_AA;
+
+    // exp_power_imgs[local_image_id] = power spectrum of that image on original size
+    std::vector<MultidimArray<double> > exp_power_imgs;
+
+    // 2D array that store metadata
+    // e.g. exp_metadata[particle_id][metadata_id]
+    MultidimArray<double> exp_metadata;
+
+    // 3D array that store real-domain image
+    // e.g. exp_imagedata[particle_id][x][y]
+    MultidimArray<double> exp_imagedata;
+
     double exp_thisparticle_sumweight;
 
     //TMP DEBUGGING

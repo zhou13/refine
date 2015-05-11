@@ -1666,7 +1666,7 @@ void MlOptimiserMpi::iterate()
 
 #ifdef TIMING
         // Only first slave prints it timing information
-        else if (node->rank == 1)
+        if (node->rank == 1)
             timer.printTimes(false);
 #endif
 

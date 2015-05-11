@@ -575,9 +575,6 @@ public:
 
     double exp_thisparticle_sumweight;
 
-    //TMP DEBUGGING
-    MultidimArray<double> DEBUGGING_COPY_exp_Mweight;
-
 #ifdef TIMING
     Timer timer;
     int TIMING_DIFF_PROJ, TIMING_DIFF_SHIFT, TIMING_DIFF_DIFF2;
@@ -660,6 +657,7 @@ public:
      * The number of pooled particles is determined by max_nr_pool and some memory checks in expectationSetup()
      */
     void expectationSomeParticles(long int my_first_particle, long int my_last_particle);
+    void expectationSomeParticlesOnCUDA(long int my_first_particle, long int my_last_particle);
 
     /* Maximization step
      * Updates the current model: reconstructs and updates all other model parameter

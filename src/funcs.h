@@ -294,14 +294,6 @@ double gaussian2D(double x,
                   double muY = 0);
 //@}
 
-/** Compute the logarithm in base 2
- */
-// Does not work with xlc compiler
-#ifndef __xlC__
-double log2(double value);
-#endif
-//@}
-
 /** @name Random functions
  *
  * These functions allow you to work in an easier way with the random functions

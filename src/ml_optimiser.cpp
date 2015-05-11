@@ -18,6 +18,7 @@
  * author citations must be preserved.
  ***************************************************************************/
 #include "ml_optimiser.h"
+#include "cuda/expectation.cuh"
 //#define DEBUG
 //#define DEBUG_CHECKSIZES
 //#define CHECKSIZES
@@ -1889,6 +1890,89 @@ void MlOptimiser::expectationSomeParticles(long int my_first_ori_particle, long 
 
 }
 
+void MlOptimiser::expectationSomeParticlesOnCUDA(long int my_first_ori_particle, long int my_last_ori_particle)
+{
+    exp_my_first_ori_particle = my_first_ori_particle;
+    exp_my_last_ori_particle = my_last_ori_particle;
+    exp_nr_ori_particles = exp_my_last_ori_particle - exp_my_first_ori_particle + 1;
+
+    exp_nr_particles = 0;
+    for (long int i = my_first_ori_particle; i <= my_last_ori_particle; i++)
+        exp_nr_particles += mydata.ori_particles[i].particles_id.size();
+
+    if (nr_pool == 1 && exp_nr_particles/exp_nr_ori_particles > 1) {
+        int my_pool = exp_nr_particles/exp_nr_ori_particles;
+        exp_ipart_ThreadTaskDistributor->resize(my_pool, 1);
+    }
+
+    iclass_min = 0;
+    iclass_max = mymodel.nr_classes - 1;
+    // low-pass filter again and generate the seeds
+    if (do_generate_seeds)
+    {
+        if (do_firstiter_cc && iter == 1)
+            iclass_min = iclass_max = 0;
+        else if ((do_firstiter_cc && iter == 2) ||
+                 (!do_firstiter_cc && iter == 1))
+        {
+            iclass_min = iclass_max = divide_equally_which_group(
+                        mydata.numberOfOriginalParticles(),
+                        mymodel.nr_classes,
+                        exp_my_first_ori_particle);
+        }
+    }
+
+
+    exp_ipart_ThreadTaskDistributor->reset();
+    global_ThreadManager->run(globalGetFourierTransformsAndCtfs);
+
+    if (do_realign_movies ) {
+        calculateRunningAveragesOfMovieFrames();
+    }
+
+    exp_significant_weight.clear();
+    exp_significant_weight.resize(exp_nr_particles);
+    for (int n = 0; n < exp_nr_particles; n++)
+        exp_significant_weight[n] = -1.;
+
+    exp_nr_trans = sampling.NrTranslationalSamplings();
+    exp_nr_dir = sampling.NrDirections();
+    exp_nr_psi = sampling.NrPsiSamplings();
+    exp_nr_rot = exp_nr_dir * exp_nr_psi;
+
+    int nr_sampling_passes = (adaptive_oversampling > 0) ? 2 : 1;
+
+    do_always_cc = true;
+    ExpectationCudaSolver solver(this);
+    solver.initialize();
+
+    for (exp_ipass = 0; exp_ipass < nr_sampling_passes; exp_ipass++) {
+        if (strict_highres_exp > 0.)
+            exp_current_image_size = coarse_size;
+        else if (adaptive_oversampling > 0)
+            exp_current_image_size = (exp_ipass == 0) ? coarse_size : mymodel.current_size;
+        else
+            exp_current_image_size = mymodel.current_size;
+
+        exp_current_oversampling = (exp_ipass == 0) ? 0 : adaptive_oversampling;
+        exp_nr_oversampled_rot = sampling.oversamplingFactorOrientations(exp_current_oversampling);
+        exp_nr_oversampled_trans = sampling.oversamplingFactorTranslations(exp_current_oversampling);
+
+
+        getAllSquaredDifferences();
+        solver.copyWindowsedImagesToGPU();
+        solver.getShiftedImages();
+        solver.getSquareDifference();
+        for (;;) std::cerr << "h";
+        exit(0);
+
+        convertAllSquaredDifferencesToWeights();
+    }
+    exp_current_image_size = mymodel.current_size;
+    storeWeightedSums();
+}
+
+
 void MlOptimiser::maximization()
 {
 
@@ -2891,28 +2975,6 @@ void MlOptimiser::doThreadGetFourierTransformsAndCtfs(int thread_id)
 
                     ctf.getFftwImage(Fctf, mymodel.ori_size, mymodel.ori_size, mymodel.pixel_size,
                             ctf_phase_flipped, only_flip_phases, intact_ctf_first_peak, true);
-//#define DEBUG_CTF_FFTW_IMAGE
-#ifdef DEBUG_CTF_FFTW_IMAGE
-                    Image<double> tt;
-                    tt()=Fctf;
-                    tt.write("relion_ctf.spi");
-                    std::cerr << "Written relion_ctf.spi, now exiting..." << std::endl;
-                    exit(1);
-#endif
-//#define DEBUG_GETCTF
-#ifdef DEBUG_GETCTF
-                    std::cerr << " intact_ctf_first_peak= " << intact_ctf_first_peak << std::endl;
-                    ctf.write(std::cerr);
-                    Image<double> tmp;
-                    tmp()=Fctf;
-                    tmp.write("Fctf.spi");
-                    tmp().resize(mymodel.ori_size, mymodel.ori_size);
-                    ctf.getCenteredImage(tmp(), mymodel.pixel_size, ctf_phase_flipped, only_flip_phases, intact_ctf_first_peak, true);
-                    tmp.write("Fctf_cen.spi");
-                    std::cerr << "Written Fctf.spi, Fctf_cen.spi. Press any key to continue..." << std::endl;
-                    char c;
-                    std::cin >> c;
-#endif
                 }
                 else
                 {
@@ -2979,7 +3041,8 @@ void MlOptimiser::doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s(int thread_
                 std::cerr<< "my_image_no= "<<my_image_no<<" exp_Fimgs.size()= "<< exp_Fimgs.size() <<std::endl;
                 std::cerr << " exp_nr_trans= " << exp_nr_trans << " exp_nr_oversampled_trans= " << exp_nr_oversampled_trans << " exp_current_oversampling= " << exp_current_oversampling << std::endl;
                 REPORT_ERROR("my_image_no >= exp_Fimgs.size()");
-            }
+            };
+
 #endif
             // Downsize Fimg and Fctf (again) to exp_current_image_size, also initialise Fref and Fimg_shift to the right size
             MultidimArray<Complex > Fimg, Fshifted, Fimg_nomask, Fshifted_nomask;

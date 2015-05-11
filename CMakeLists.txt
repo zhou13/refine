@@ -14,11 +14,18 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(CheckCXXCompilerFlag)
 
 if(NOT MSVC)
-    set(GCC_PARAMETERS "-Wall -std=c++1y")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_PARAMETERS}")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${GCC_PARAMETERS} -g3 -DDEBUG")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_PARAMETERS} -O2")
-    set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE} -g3")
+    add_definitions(-std=c++11)
+    add_definitions(-DTIMING)
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_PARAMETERS}")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CXX_PARAMETERS} -O0 -ggdb -DDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CXX_PARAMETERS} -O2")
+    set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE} -ggdb")
+
+    set(CUDA_NVCC_PARAMETERS "--std=c++11 -gencode arch=compute_35,code=sm_35 --ptxas-options -v")
+    set(CUDA_NVCC_FLAGS_DEBUG "${CUDA_NVCC_FLAGS_DEBUG} ${CUDA_NVCC_PARAMETERS} -lineinfo")
+    set(CUDA_NVCC_FLAGS_RELEASE "${CUDA_NVCC_FLAGS_RELEASE} ${CUDA_NVCC_PARAMETERS} -O2")
+    set(CUDA_NVCC_FLAGS_PROFILE "${CUDA_NVCC_FLAGS_RELEASE}")
 
     if(CMAKE_BUILD_TYPE STREQUAL "PROFILE")
         find_package(GProfiler REQUIRED)
@@ -35,15 +42,21 @@ if(NOT MSVC)
     endif()
 endif(NOT MSVC)
 
+
+find_package(CUDA REQUIRED)
+include_directories(${CUDA_INCLUDE_DIR})
+
 find_package(Threads REQUIRED)
+
 find_package(MPI REQUIRED)
 include_directories(${MPI_CXX_INCLUDE_PATH})
+
 find_package(FFTW3 COMPONENTS double threads REQUIRED)
 include_directories(${FFTW3_INCLUDE_DIR})
-add_subdirectory(lib/Healpix_2.15a)
-include_directories(lib/Healpix_2.15a)
 
-include_directories(src)
+add_subdirectory(lib)
+include_directories(lib/Healpix_2.15a)
+include_directories(lib/moderngpu/include)
 
 set(
     refine_SRC
@@ -70,8 +83,6 @@ set(
     src/metadata_table.cpp
     src/ml_model.cpp
     src/ml_optimiser.cpp
-    src/ml_optimiser_mpi.cpp
-    src/mpi_node.cpp
     src/multidim_array.cpp
     src/numerical_recipes.cpp
     src/parallel.cpp
@@ -84,6 +95,20 @@ set(
 
     src/apps/refine.cpp
 )
+include_directories(src)
+
+set(
+    cuda_expectation_SRC
+    src/cuda/utils.cuh
+    src/cuda/kernel.cuh
+    src/cuda/expectation.cu
+    src/cuda/expectation.cuh
+)
+
+cuda_add_library(
+    cuda_expectation
+    ${cuda_expectation_SRC}
+)
 
 add_executable(
     refine
@@ -93,6 +118,8 @@ add_executable(
 target_link_libraries(
     refine
     healpix
+    cuda_expectation
+    moderngpu
     ${PROFILER}
     ${FFTW3_LIBRARY}
     ${FFTW3_THREADS_LIBRARY}

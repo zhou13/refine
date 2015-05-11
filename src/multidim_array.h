@@ -46,6 +46,7 @@
 #define MULTIDIM_ARRAY_H
 
 #include <typeinfo>
+#include <cassert>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -1577,6 +1578,8 @@ public:
         case 3:
             return A3D_ELEM((*this), ROUND(ZZ(v)), ROUND(YY(v)), ROUND(XX(v)));
         }
+        assert(false);
+        return T();
     }
 
     /** Volume element access via integer vector.
@@ -1592,6 +1595,8 @@ public:
         case 3:
             return A3D_ELEM((*this), ZZ(v), YY(v), XX(v));
         }
+        assert(false);
+        return T();
     }
 
     /** 4D element access via index.

@@ -1,0 +1,4 @@
+[submodule "lib/moderngpu"]
+	path = lib/moderngpu
+	url = git@github.com:NVlabs/moderngpu.git
+	branch = master

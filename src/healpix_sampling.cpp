@@ -803,7 +803,7 @@ double HealpixSampling::getAngularSampling(int adaptive_oversampling)
 long int HealpixSampling::NrDirections(int oversampling_order, bool include_zeroprior)
 {
     long int mysize = (orientational_prior_mode == NOPRIOR || include_zeroprior) ? directions_angles.size() : pointer_dir_nonzeroprior.size();
-    if (oversampling_order == 0)
+    if (!is_3D)
         return mysize;
     else
         return ROUND(std::pow(2., oversampling_order * 2)) * mysize;

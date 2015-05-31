@@ -28,6 +28,7 @@
 #include "timer.h"
 #include "mask.h"
 #include "healpix_sampling.h"
+#include "cuda/expectation.cuh"
 
 #define ML_SIGNIFICANT_WEIGHT 1.e-8
 #define METADATA_LINE_LENGTH METADATA_LINE_LENGTH_ALL
@@ -94,6 +95,7 @@
 //#define TIMING
 
 class MlOptimiser;
+class ExpectationCudaSolver;
 
 class MlOptimiser
 {
@@ -125,6 +127,9 @@ public:
 
     // Filename for input tau2-spectrum
     FileName fn_tau;
+
+    // CUDA solver
+    ExpectationCudaSolver cuda_solver;
 
     // Flag to keep tau-spectrum constant
     bool fix_tau;
@@ -310,6 +315,8 @@ public:
     bool do_firstiter_cc;
 
     /// Always perform cross-correlation instead of marginalization
+    ///     Yichao 2015/05/25:  For me, cc here should represent cosine correlation.
+    ///                         It also change the Baysian methods to frequentists' method.
     bool do_always_cc;
 
     // Initial low-pass filter for all references (in digital frequency)
@@ -402,6 +409,9 @@ public:
     // Verbosity flag
     int verb;
 
+    // Use CUDA acceration
+    int use_cuda;
+
     // Thread Managers for the expectation step: one for allorientations, the other for all (pooled) particles
     ThreadTaskDistributor *exp_iorient_ThreadTaskDistributor, *exp_ipart_ThreadTaskDistributor;
 
@@ -427,7 +437,7 @@ public:
     //      with exp_old_offset translated and BeamTilt (what's that?)
     std::vector<MultidimArray<Complex> > exp_Fimgs_nomask;
 
-    // exp_local_Fimgs_shifted{,_nomask}[local_image_id][trans_samples]
+    // exp_local_Fimgs_shifted{,_nomask}[trans_samples]
     //      = translation sampled image in Fourier space
     std::vector<MultidimArray<Complex> > exp_local_Fimgs_shifted;
     std::vector<MultidimArray<Complex> > exp_local_Fimgs_shifted_nomask;
@@ -538,6 +548,8 @@ public:
     //   exp_Mweight[local_particle_id][class_samples_id] =
     //       prior probability of class_samples_id *
     //       e^(-exp_Mweight[.][.] + exp_min_diff2[local_particle_id]);
+    //
+    // class_sample_id = [iclass][irot][itrans][ioverrot][iovertrans]
     MultidimArray<double> exp_Mweight;
 
     // exp_Mcoarse_significant[local_particle_id][class_samples_id] =
@@ -575,8 +587,24 @@ public:
 
     double exp_thisparticle_sumweight;
 
-#ifdef TIMING
+#ifdef CHECK_RESULT
+    std::vector<MultidimArray<Complex>> exp_Fimgs_backup;
+    std::vector<MultidimArray<double>> exp_Fweight_backup;
+
+    std::vector<MultidimArray<double> > exp_wsum_sigma2_noise_backup;
+    std::vector<MultidimArray<double> > exp_wsum_scale_correction_XA_backup;
+    std::vector<MultidimArray<double> > exp_wsum_scale_correction_AA_backup;
+    std::vector<MultidimArray<double> > exp_wsum_pdf_direction_backup;
+    std::vector<double> exp_wsum_norm_correction_backup;
+    std::vector<double> exp_sumw_group_backup;
+    std::vector<double> exp_wsum_pdf_class_backup;
+    std::vector<double> exp_wsum_prior_offsetx_class_backup;
+    std::vector<double> exp_wsum_prior_offsety_class_backup;
+    double exp_wsum_sigma2_offset_backup;
+#endif
+
     Timer timer;
+#ifdef TIMING
     int TIMING_DIFF_PROJ, TIMING_DIFF_SHIFT, TIMING_DIFF_DIFF2;
     int TIMING_WSUM_PROJ, TIMING_WSUM_BACKPROJ, TIMING_WSUM_DIFF2, TIMING_WSUM_SUMSHIFT;
     int TIMING_EXP, TIMING_MAX, TIMING_RECONS;
@@ -585,6 +613,8 @@ public:
 #endif
 
 public:
+
+    MlOptimiser() : cuda_solver(this) { }
 
     /** ========================== I/O operations  =========================== */
     /// Print help message

@@ -493,6 +493,7 @@ void selfScaleToSizeFourier(long int Ydim, long int Xdim, MultidimArray<double>&
 }
 */
 
+extern int ZYC_DEBUG;
 // Shift an image through phase-shifts in its Fourier Transform
 void shiftImageInFourierTransform(MultidimArray<Complex > &in,
                                   MultidimArray<Complex > &out,
@@ -547,6 +548,24 @@ void shiftImageInFourierTransform(MultidimArray<Complex > &in,
                 bd = b * d;
                 ab_cd = (a + b) * (c + d);
                 DIRECT_A2D_ELEM(out, i, j) = Complex(ac - bd, ab_cd - ac - bd);
+                int pixel = in.xdim * i + j;
+                /*
+                if (ZYC_DEBUG == 1992 && pixel == 55) {
+                    printf("pixel: %d (CPU)\n", pixel);
+                    printf("x: %.5f\n", x);
+                    printf("y: %.5f\n", y);
+                    printf("xshift: %.5f\n", xshift);
+                    printf("yshift: %.5f\n", yshift);
+                    printf("dotp: %.5f\n", dotp);
+                    printf("a: %.5f\n", a);
+                    printf("b: %.5f\n", b);
+                    printf("c: %.5f\n", c);
+                    printf("d: %.5f\n", d);
+                    printf("ac: %.5f\n", ac);
+                    printf("real: %.5f\n", ac - bd);
+                    printf("imag: %.5f\n\n\n", ab_cd - ac - bd);
+                }
+                */
             }
         for (long int i=YSIZE(in)-1; i>=XSIZE(in); i--)
         {

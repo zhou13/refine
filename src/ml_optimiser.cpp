@@ -26,7 +26,7 @@
 Mutex global_mutex, global_mutex2;
 Barrier * global_barrier;
 ThreadManager * global_ThreadManager;
-
+int ZYC_DEBUG = 0;
 
 // Global functions to work with threads
 void globalGetFourierTransformsAndCtfs(ThreadArgument &thArg)
@@ -255,6 +255,8 @@ void MlOptimiser::parseContinue(int argc, char **argv)
 
     verb = textToInteger(parser.getOption("--verb", "Verbosity (1=normal, 0=silent)", "1"));
 
+    use_cuda = textToInteger(parser.getOption("--use_cuda", "Use CUDA acceration (1 to enable CUDA)", "1"));
+
     int expert_section = parser.addSection("Expert options");
 
     fnt = parser.getOption("--strict_highres_exp", "Resolution limit (in Angstrom) to restrict probability calculations in the expectation step", "OLD");
@@ -388,7 +390,7 @@ void MlOptimiser::parseInitial(int argc, char **argv)
     int computation_section = parser.addSection("Computation");
     nr_threads = textToInteger(parser.getOption("--j", "Number of threads to run in parallel (only useful on multi-core machines)", "1"));
     available_memory = textToFloat(parser.getOption("--memory_per_thread", "Available RAM (in Gb) for each thread", "2"));
-    max_nr_pool = textToInteger(parser.getOption("--pool", "Number of images to be processed together", "8"));
+    max_nr_pool = textToInteger(parser.getOption("--pool", "Number of images to be processed together", "64"));
     combine_weights_thru_disc = !parser.checkOption("--dont_combine_weights_via_disc", "Send the large arrays of summed weights through the MPI network, instead of writing large files to disc");
 
     // Expert options
@@ -397,6 +399,7 @@ void MlOptimiser::parseInitial(int argc, char **argv)
     mymodel.interpolator = (parser.checkOption("--NN", "Perform nearest-neighbour instead of linear Fourier-space interpolation?")) ? NEAREST_NEIGHBOUR : TRILINEAR;
     mymodel.r_min_nn = textToInteger(parser.getOption("--r_min_nn", "Minimum number of Fourier shells to perform linear Fourier-space interpolation", "10"));
     verb = textToInteger(parser.getOption("--verb", "Verbosity (1=normal, 0=silent)", "1"));
+    use_cuda = textToInteger(parser.getOption("--use_cuda", "Use CUDA acceration (1 to enable CUDA)", "1"));
     random_seed = textToInteger(parser.getOption("--random_seed", "Number for the random seed generator", "-1"));
     max_coarse_size = textToInteger(parser.getOption("--coarse_size", "Maximum image size for the first pass of the adaptive sampling approach", "-1"));
     adaptive_fraction = textToFloat(parser.getOption("--adaptive_fraction", "Fraction of the weights to be considered in the first pass of adaptive oversampling ", "0.999"));
@@ -1485,7 +1488,10 @@ void MlOptimiser:: expectation()
         getMetaAndImageDataSubset(my_first_ori_particle, my_last_ori_particle);
 
         // perform the actual expectation step on several particles
-        expectationSomeParticles(my_first_ori_particle, my_last_ori_particle);
+        if (use_cuda)
+            expectationSomeParticlesOnCUDA(my_first_ori_particle, my_last_ori_particle);
+        else
+            expectationSomeParticles(my_first_ori_particle, my_last_ori_particle);
 
         // Set the metadata for these particles
         setMetaDataSubset(my_first_ori_particle, my_last_ori_particle);
@@ -1942,10 +1948,8 @@ void MlOptimiser::expectationSomeParticlesOnCUDA(long int my_first_ori_particle,
 
     int nr_sampling_passes = (adaptive_oversampling > 0) ? 2 : 1;
 
-    do_always_cc = true;
-    ExpectationCudaSolver solver(this);
-    solver.initialize();
-
+    // do_always_cc = true;
+    cuda_solver.initialize();
     for (exp_ipass = 0; exp_ipass < nr_sampling_passes; exp_ipass++) {
         if (strict_highres_exp > 0.)
             exp_current_image_size = coarse_size;
@@ -1958,16 +1962,17 @@ void MlOptimiser::expectationSomeParticlesOnCUDA(long int my_first_ori_particle,
         exp_nr_oversampled_rot = sampling.oversamplingFactorOrientations(exp_current_oversampling);
         exp_nr_oversampled_trans = sampling.oversamplingFactorTranslations(exp_current_oversampling);
 
+        fprintf(stderr, "\n================ pass %d =================\n", exp_ipass);
 
+#ifdef CHECK_RESULT
         getAllSquaredDifferences();
-        solver.copyWindowsedImagesToGPU();
-        solver.getShiftedImages();
-        solver.getSquareDifference();
-        for (;;) std::cerr << "h";
-        exit(0);
-
-        convertAllSquaredDifferencesToWeights();
+#endif
+        cuda_solver.copyWindowsedImagesToGPU();
+        cuda_solver.getShiftedImages();
+        cuda_solver.getSquaredDifference();
+        cuda_solver.convertSquaredDifferencesToWeights();
     }
+    fprintf(stderr, "\n================ store weight =================\n");
     exp_current_image_size = mymodel.current_size;
     storeWeightedSums();
 }
@@ -1987,7 +1992,7 @@ void MlOptimiser::maximization()
     {
         if (mymodel.pdf_class[iclass] > 0.)
         {
-            (wsum_model.BPref[iclass]).reconstruct(
+            wsum_model.BPref[iclass].reconstruct(
                         mymodel.Iref[iclass],
                         gridding_nr_iter,
                         do_map,
@@ -3011,7 +3016,8 @@ void MlOptimiser::doThreadGetFourierTransformsAndCtfs(int thread_id)
 void MlOptimiser::doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s(int thread_id)
 {
 #ifdef TIMING
-    timer.tic(TIMING_DIFF_SHIFT);
+    if (thread_id == 0)
+        timer.tic(TIMING_DIFF_SHIFT);
 #endif
 
 
@@ -3152,6 +3158,14 @@ void MlOptimiser::doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s(int thread_
                 {
                     DIRECT_MULTIDIM_ELEM(Minvsigma2, n) = 1. / (sigma2_fudge * DIRECT_A1D_ELEM(mymodel.sigma2_noise[group_id], ires));
                 }
+//                if (!my_image_no && n == 33) {
+//                    printf("    n (CPU)\t:%d\n", n);
+//                    printf("    ires\t:%d\n", ires);
+//                    printf("    group_id\t:%d\n", group_id);
+//                    printf("    sigma2_fudge\t:%.5f\n", sigma2_fudge);
+//                    printf("    sigma2_noise\t:%.5f\n", DIRECT_A1D_ELEM(mymodel.sigma2_noise[group_id], ires));
+//                    printf("    invSigma2\t:%.5f\n", DIRECT_MULTIDIM_ELEM(Minvsigma2, n));
+//                }
             }
 
 #ifdef DEBUG_CHECKSIZES
@@ -3169,15 +3183,14 @@ void MlOptimiser::doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s(int thread_
     global_barrier->wait();
 
 #ifdef TIMING
-    timer.toc(TIMING_DIFF_SHIFT);
+    if (thread_id == 0)
+        timer.toc(TIMING_DIFF_SHIFT);
 #endif
-
 
 }
 
 bool MlOptimiser::isSignificantAnyParticleAnyTranslation(long int iorient)
 {
-
     for (long int ipart = 0; ipart < YSIZE(exp_Mcoarse_significant); ipart++)
     {
         long int ihidden = iorient * exp_nr_trans;
@@ -3227,7 +3240,6 @@ void MlOptimiser::doThreadGetSquaredDifferencesAllOrientations(int thread_id)
     {
         for (long int iorient = first_iorient; iorient <= last_iorient; iorient++)
         {
-
             long int iorientclass = iorientclass_offset + iorient;
             long int idir = iorient / exp_nr_psi;
             long int ipsi = iorient % exp_nr_psi;
@@ -4008,7 +4020,7 @@ void MlOptimiser::convertAllSquaredDifferencesToWeights()
             // Check the sum of weights is not zero
 // On a Mac, the isnan function does not compile. Just uncomment the define statement, as this is merely a debugging statement
 //#define MAC_OSX
-#ifndef MAC_OSX
+#ifdef MAC_OSX
             if (exp_thisparticle_sumweight == 0. || std::isnan(exp_thisparticle_sumweight))
             {
                 std::cerr << " exp_thisparticle_sumweight= " << exp_thisparticle_sumweight << std::endl;
@@ -4422,6 +4434,12 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                                     // Only sum weights for non-zero weights
                                     if (weight >= exp_significant_weight[ipart])
                                     {
+                                        /*
+                                        std::cerr << "=========" << std::endl;
+                                        std::cerr << "orient: " << iorient << " " << iover_rot << std::endl;
+                                        std::cerr << "trans: " << itrans << " " << iover_trans << std::endl;
+                                        std::cerr << "my_image_no: " << my_image_no << std::endl;
+                                        */
 #ifdef TIMING
                                         // Only time one thread, as I also only time one MPI process
                                         if (thread_id == 0)
@@ -4480,8 +4498,14 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                                                 }
                                             }
 
-                                            // Store sum of weights for this group
                                             thr_sumw_group[group_id] += weight;
+                                            /*
+                                            // Store sum of weights for this group
+                                            static int count = 0;
+                                            if (exp_my_first_ori_particle == 8) {
+                                                printf("weigh2 : %.8f %6d %6d %6d %6d %6d\n", weight, ipart, iorient, iover_rot, itrans, iover_trans, group_id);
+                                            }
+                                            */
 
                                             // Store weights for this class and orientation
                                             thr_wsum_pdf_class[exp_iclass] += weight;
@@ -4572,6 +4596,12 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                         }// end loop part_id (i)
                     } // end loop ori_part_id
 
+                    int index = iover_rot + exp_nr_oversampled_rot*(iorient + exp_nr_rot * exp_iclass);
+#ifdef CHECK_RESULT
+                    exp_Fimgs_backup[index] = Fimg;
+                    exp_Fweight_backup[index] = Fweight;
+#endif
+
                     if (!do_skip_maximization)
                     {
 #ifdef TIMING
@@ -4604,42 +4634,53 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
 
     if (!do_skip_maximization)
     {
-        if (do_scale_correction)
+        // When comparing result with CUDA, we always increase answer in
+        // ExpectationCudaSolver.
+        if (!use_cuda)
         {
+            if (do_scale_correction)
+            {
+                for (int n = 0; n < exp_nr_particles; n++)
+                {
+                    exp_wsum_scale_correction_XA[n] += thr_wsum_scale_correction_XA[n];
+                    exp_wsum_scale_correction_AA[n] += thr_wsum_scale_correction_AA[n];
+                }
+            }
             for (int n = 0; n < exp_nr_particles; n++)
             {
-                exp_wsum_scale_correction_XA[n] += thr_wsum_scale_correction_XA[n];
-                exp_wsum_scale_correction_AA[n] += thr_wsum_scale_correction_AA[n];
+                exp_wsum_norm_correction[n] += thr_wsum_norm_correction[n];
             }
-        }
-        for (int n = 0; n < exp_nr_particles; n++)
-        {
-            exp_wsum_norm_correction[n] += thr_wsum_norm_correction[n];
-        }
-        for (int n = 0; n < mymodel.nr_groups; n++)
-        {
-            wsum_model.sigma2_noise[n] += thr_wsum_sigma2_noise[n];
-            wsum_model.sumw_group[n] += thr_sumw_group[n];
-        }
-        for (int n = 0; n < mymodel.nr_classes; n++)
-        {
-            wsum_model.pdf_class[n] += thr_wsum_pdf_class[n];
+            for (int n = 0; n < mymodel.nr_groups; n++)
+            {
+                wsum_model.sigma2_noise[n] += thr_wsum_sigma2_noise[n];
+                wsum_model.sumw_group[n] += thr_sumw_group[n];
+            }
+            for (int n = 0; n < mymodel.nr_classes; n++)
+            {
+                wsum_model.pdf_class[n] += thr_wsum_pdf_class[n];
 
-            if (mymodel.ref_dim == 2)
-            {
-                XX(wsum_model.prior_offset_class[n]) += thr_wsum_prior_offsetx_class[n];
-                YY(wsum_model.prior_offset_class[n]) += thr_wsum_prior_offsety_class[n];
+                if (mymodel.ref_dim == 2)
+                {
+                    XX(wsum_model.prior_offset_class[n]) += thr_wsum_prior_offsetx_class[n];
+                    YY(wsum_model.prior_offset_class[n]) += thr_wsum_prior_offsety_class[n];
+                }
+                wsum_model.pdf_direction[n] += thr_wsum_pdf_direction[n];
             }
-#ifdef CHECKSIZES
-            if (XSIZE(wsum_model.pdf_direction[n]) != XSIZE(thr_wsum_pdf_direction[n]))
-            {
-                std::cerr << " XSIZE(wsum_model.pdf_direction[n])= " << XSIZE(wsum_model.pdf_direction[n]) << " XSIZE(thr_wsum_pdf_direction[n])= " << XSIZE(thr_wsum_pdf_direction[n]) << std::endl;
-                REPORT_ERROR("XSIZE(wsum_model.pdf_direction[n]) != XSIZE(thr_wsum_pdf_direction[n])");
-            }
-#endif
-            wsum_model.pdf_direction[n] += thr_wsum_pdf_direction[n];
+            wsum_model.sigma2_offset += thr_wsum_sigma2_offset;
         }
-        wsum_model.sigma2_offset += thr_wsum_sigma2_offset;
+
+#ifdef CHECK_RESULT
+        exp_wsum_scale_correction_XA_backup = thr_wsum_scale_correction_XA;
+        exp_wsum_scale_correction_AA_backup = thr_wsum_scale_correction_AA;
+        exp_wsum_norm_correction_backup = thr_wsum_norm_correction;
+        exp_wsum_sigma2_noise_backup = thr_wsum_sigma2_noise;
+        exp_sumw_group_backup = thr_sumw_group;
+        exp_wsum_prior_offsetx_class_backup = thr_wsum_prior_offsetx_class;
+        exp_wsum_prior_offsety_class_backup = thr_wsum_prior_offsety_class;
+        exp_wsum_pdf_class_backup = thr_wsum_pdf_class;
+        exp_wsum_pdf_direction_backup = thr_wsum_pdf_direction;
+        exp_wsum_sigma2_offset_backup = thr_wsum_sigma2_offset;
+#endif
     } // end if !do_skip_maximization
 
     // Check max_weight for each particle and set exp_metadata
@@ -4674,7 +4715,6 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
 
 void MlOptimiser::storeWeightedSums()
 {
-
 #ifdef TIMING
     timer.tic(TIMING_ESP_WSUM);
 #endif
@@ -4684,31 +4724,43 @@ void MlOptimiser::storeWeightedSums()
     for (int n = 0; n < exp_nr_particles; n++)
         exp_max_weight[n] = -1.;
 
-    // In doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s() the origin of the exp_local_Minvsigma2s was omitted.
-    // Set those back here
-    for (long int ori_part_id = exp_my_first_ori_particle, ipart = 0; ori_part_id <= exp_my_last_ori_particle; ori_part_id++)
-    {
-        // loop over all particles inside this ori_particle
-        for (long int i = 0; i < mydata.ori_particles[ori_part_id].particles_id.size(); i++, ipart++)
+    assert(!use_cuda || this->strict_highres_exp <= 0.);
+    if (!use_cuda)  {
+        // In doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s() the origin of the exp_local_Minvsigma2s was omitted.
+        // Set those back here
+        for (long int ori_part_id = exp_my_first_ori_particle, ipart = 0; ori_part_id <= exp_my_last_ori_particle; ori_part_id++)
         {
-            long int part_id = mydata.ori_particles[ori_part_id].particles_id[i];
-
-            for (exp_iseries = 0; exp_iseries < mydata.getNrImagesInSeries(part_id); exp_iseries++)
+            // loop over all particles inside this ori_particle
+            for (long int i = 0; i < mydata.ori_particles[ori_part_id].particles_id.size(); i++, ipart++)
             {
-                // Re-get all shifted versions of the (current_sized) images, their (current_sized) CTFs and their inverted Sigma2 matrices
-                // This may be necessary for when using --strict_highres_exp. Otherwise norm estimation may become unstable!!
-                exp_ipart_ThreadTaskDistributor->reset(); // reset thread distribution tasks
-                global_ThreadManager->run(globalThreadPrecalculateShiftedImagesCtfsAndInvSigma2s);
+                long int part_id = mydata.ori_particles[ori_part_id].particles_id[i];
 
-                int group_id = mydata.getGroupId(part_id, exp_iseries);
-                int my_image_no = exp_starting_image_no[ipart] + exp_iseries;
-                DIRECT_MULTIDIM_ELEM(exp_local_Minvsigma2s[my_image_no], 0) = 1. / (sigma2_fudge * DIRECT_A1D_ELEM(mymodel.sigma2_noise[group_id], 0));
+                for (exp_iseries = 0; exp_iseries < mydata.getNrImagesInSeries(part_id); exp_iseries++)
+                {
+                    // Re-get all shifted versions of the (current_sized) images, their (current_sized) CTFs and their inverted Sigma2 matrices
+                    // This may be necessary for when using --strict_highres_exp. Otherwise norm estimation may become unstable!!
+                    exp_ipart_ThreadTaskDistributor->reset(); // reset thread distribution tasks
+                    global_ThreadManager->run(globalThreadPrecalculateShiftedImagesCtfsAndInvSigma2s);
+
+                    int group_id = mydata.getGroupId(part_id, exp_iseries);
+                    int my_image_no = exp_starting_image_no[ipart] + exp_iseries;
+                    // BUG
+                    // DIRECT_MULTIDIM_ELEM(exp_local_Minvsigma2s[my_image_no], 0) = 1. / (sigma2_fudge * DIRECT_A1D_ELEM(mymodel.sigma2_noise[group_id], 0));
+                }
             }
         }
     }
 
+
+#ifdef CHECK_RESULT
+    exp_Fimgs_backup.resize(mymodel.nr_classes * exp_nr_rot * exp_nr_oversampled_rot);
+    exp_Fweight_backup.resize(mymodel.nr_classes * exp_nr_rot * exp_nr_oversampled_rot);
+#endif
+
     for (exp_iseries = 0; exp_iseries < mydata.getNrImagesInSeries((mydata.ori_particles[exp_my_first_ori_particle]).particles_id[0]); exp_iseries++)
     {
+        if (use_cuda)
+            assert(exp_iseries == 0);
         // TODO: check this!!!
         // I think this is just done for the first ipart
         int my_image_no = exp_starting_image_no[0] + exp_iseries;
@@ -4723,6 +4775,7 @@ void MlOptimiser::storeWeightedSums()
         exp_R_mic(2,0) = DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_MAT_2_0);
         exp_R_mic(2,1) = DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_MAT_2_1);
         exp_R_mic(2,2) = DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_MAT_2_2);
+        assert(exp_R_mic.isIdentity());
 
         // For norm_correction of this iseries image:
         exp_wsum_norm_correction.resize(exp_nr_particles);
@@ -4743,15 +4796,25 @@ void MlOptimiser::storeWeightedSums()
             }
         }
 
-        // Loop from iclass_min to iclass_max to deal with seed generation in first iteration
-        for (exp_iclass = iclass_min; exp_iclass <= iclass_max; exp_iclass++)
+        bool do_cpu_sum_weights = !use_cuda;
+#ifdef CHECK_RESULT
+        do_cpu_sum_weights = true;
+#endif
+        if (do_cpu_sum_weights)
         {
+            // Loop from iclass_min to iclass_max to deal with seed generation in first iteration
+            for (exp_iclass = iclass_min; exp_iclass <= iclass_max; exp_iclass++)
+            {
+                // The loops over all orientations are parallelised using threads
+                exp_iorient_ThreadTaskDistributor->reset(); // reset thread distribution tasks
+                global_ThreadManager->run(globalThreadStoreWeightedSumsAllOrientations);
+            } // end loop iclass
+        }
 
-            // The loops over all orientations are parallelised using threads
-            exp_iorient_ThreadTaskDistributor->reset(); // reset thread distribution tasks
-            global_ThreadManager->run(globalThreadStoreWeightedSumsAllOrientations);
-
-        } // end loop iclass
+        if (use_cuda)
+        {
+            cuda_solver.sumWeights();
+        }
 
         // Extend norm_correction and sigma2_noise estimation to higher resolutions for all particles
         for (long int ori_part_id = exp_my_first_ori_particle, ipart = 0; ori_part_id <= exp_my_last_ori_particle; ori_part_id++)
@@ -4807,31 +4870,6 @@ void MlOptimiser::storeWeightedSums()
                         std::cout << " exp_max_weight[ipart]= " << exp_max_weight[ipart] << std::endl;
 
                     }
-                    //TMP DEBUGGING
-                    /*
-                    if (!(iter == 1 && do_firstiter_cc) && DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_NORM) > 10.)
-                    {
-                        std::cerr << " mymodel.current_size= " << mymodel.current_size << " mymodel.ori_size= " << mymodel.ori_size << " part_id= " << part_id << std::endl;
-                        std::cerr << " DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_NORM)= " << DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_NORM) << std::endl;
-                        std::cerr << " mymodel.avg_norm_correction= " << mymodel.avg_norm_correction << std::endl;
-                        std::cerr << " exp_wsum_norm_correction[ipart]= " << exp_wsum_norm_correction[ipart] << std::endl;
-                        std::cerr << " old_norm_correction= " << old_norm_correction << std::endl;
-                        std::cerr << " wsum_model.avg_norm_correction= " << wsum_model.avg_norm_correction << std::endl;
-                        std::cerr << " group_id= " << group_id << " mymodel.scale_correction[group_id]= " << mymodel.scale_correction[group_id] << std::endl;
-                        std::cerr << " mymodel.sigma2_noise[group_id]= " << mymodel.sigma2_noise[group_id] << std::endl;
-                        std::cerr << " wsum_model.sigma2_noise[group_id]= " << wsum_model.sigma2_noise[group_id] << std::endl;
-                        std::cerr << " exp_power_imgs[my_image_no]= " << exp_power_imgs[my_image_no] << std::endl;
-                        std::cerr << " exp_wsum_scale_correction_XA[ipart]= " << exp_wsum_scale_correction_XA[ipart] << " exp_wsum_scale_correction_AA[ipart]= " << exp_wsum_scale_correction_AA[ipart] << std::endl;
-                        std::cerr << " wsum_model.wsum_signal_product_spectra[group_id]= " << wsum_model.wsum_signal_product_spectra[group_id] << " wsum_model.wsum_reference_power_spectra[group_id]= " << wsum_model.wsum_reference_power_spectra[group_id] << std::endl;
-                        std::cerr << " exp_min_diff2[ipart]= " << exp_min_diff2[ipart] << std::endl;
-                        std::cerr << " ml_model.scale_correction[group_id]= " << mymodel.scale_correction[group_id] << std::endl;
-                        std::cerr << " exp_significant_weight[ipart]= " << exp_significant_weight[ipart] << std::endl;
-                        std::cerr << " exp_max_weight[ipart]= " << exp_max_weight[ipart] << std::endl;
-                        mymodel.write("debug");
-                        std::cerr << "written debug_model.star" << std::endl;
-                        REPORT_ERROR("MlOptimiser::storeWeightedSums ERROR: normalization is larger than 10");
-                    }
-                    */
 
                 }
 
@@ -5789,7 +5827,9 @@ void MlOptimiser::getMetaAndImageDataSubset(int first_ori_particle_id, int last_
                 DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_MAT_2_0) = R_mic(2,0);
                 DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_MAT_2_1) = R_mic(2,1);
                 DIRECT_A2D_ELEM(exp_metadata, my_image_no, METADATA_MAT_2_2) = R_mic(2,2);
-
+                assert(R_mic(0,0) == 1); assert(R_mic(0,1) == 0); assert(R_mic(0,2) == 0);
+                assert(R_mic(1,0) == 0); assert(R_mic(1,1) == 1); assert(R_mic(1,2) == 0);
+                assert(R_mic(2,0) == 0); assert(R_mic(2,1) == 0); assert(R_mic(2,2) == 1);
             }
         }
     }

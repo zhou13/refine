@@ -113,7 +113,7 @@ public:
 public:
 
     // Empty constructor
-    HealpixSampling() {}
+    HealpixSampling() : random_perturbation(0) {}
 
     // Destructor
     ~HealpixSampling()

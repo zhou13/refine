@@ -16,15 +16,19 @@ include(CheckCXXCompilerFlag)
 if(NOT MSVC)
     add_definitions(-std=c++11)
     add_definitions(-DTIMING)
+    # add_definitions(-DCHECK_RESULT)
+    # set(COMMON_FLAGS "-DTIMING -DCHECK_RESULT")
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_PARAMETERS}")
+    set(CXX_PARAMETERS "${COMMON_FLAGS}")
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CXX_PARAMETERS}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CXX_PARAMETERS} -O0 -ggdb -DDEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CXX_PARAMETERS} -O2")
     set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE} -ggdb")
 
-    set(CUDA_NVCC_PARAMETERS "--std=c++11 -gencode arch=compute_35,code=sm_35 --ptxas-options -v")
+    #  #  --ptxas-options -v
+    set(CUDA_NVCC_PARAMETERS "${COMMON_FLAGS} --std=c++11 -gencode arch=compute_30,code=sm_30")
     set(CUDA_NVCC_FLAGS_DEBUG "${CUDA_NVCC_FLAGS_DEBUG} ${CUDA_NVCC_PARAMETERS} -lineinfo")
-    set(CUDA_NVCC_FLAGS_RELEASE "${CUDA_NVCC_FLAGS_RELEASE} ${CUDA_NVCC_PARAMETERS} -O2")
+    set(CUDA_NVCC_FLAGS_RELEASE "${CUDA_NVCC_FLAGS_RELEASE} ${CUDA_NVCC_PARAMETERS} -lineinfo -O2")
     set(CUDA_NVCC_FLAGS_PROFILE "${CUDA_NVCC_FLAGS_RELEASE}")
 
     if(CMAKE_BUILD_TYPE STREQUAL "PROFILE")
@@ -38,7 +42,7 @@ if(NOT MSVC)
     CHECK_CXX_COMPILER_FLAG(-fsanitize=address COMPILER_SUPPORT_FSANITIZE_ADDRESS)
     unset(CMAKE_REQUIRED_FLAGS)
     if(COMPILER_SUPPORT_FSANITIZE_ADDRESS)
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
+        # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
     endif()
 endif(NOT MSVC)
 
@@ -57,12 +61,12 @@ include_directories(${FFTW3_INCLUDE_DIR})
 add_subdirectory(lib)
 include_directories(lib/Healpix_2.15a)
 include_directories(lib/moderngpu/include)
+include_directories(lib/cub)
 
 set(
     refine_SRC
 
     src/args.cpp
-    src/assembly.cpp
     src/backprojector.cpp
     src/complex.cpp
     src/ctf.cpp

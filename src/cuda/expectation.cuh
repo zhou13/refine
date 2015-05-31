@@ -14,8 +14,9 @@ public:
     void initialize();
     void copyWindowsedImagesToGPU();
     void getShiftedImages();
-    void getSquareDifference();
+    void getSquaredDifference();
     void convertSquaredDifferencesToWeights();
+    void sumWeights();
 
 private:
     HostData *h;

@@ -841,6 +841,20 @@ void MlOptimiser::initialiseGeneral(int rank)
     TIMING_WSUM_DIFF2 =    timer.setNew(" -  - ESPwsum: diff2");
     TIMING_WSUM_SUMSHIFT = timer.setNew(" -  - ESPwsum: shift");
     TIMING_WSUM_BACKPROJ = timer.setNew(" -  - ESPwsum: backproject");
+    TIMING_ZYC_A         = timer.setNew(" - ZYC: A");
+    TIMING_ZYC_B         = timer.setNew(" - ZYC: B");
+    TIMING_ZYC_C         = timer.setNew(" - ZYC: C");
+
+    time_copy = timer.setNew("- GPU: copyWindowsedImagesToGPU");
+    time_shift = timer.setNew("- GPU: getShiftedImages");
+    time_square = timer.setNew("- GPU: getSquaredDifference");
+    time_convert = timer.setNew("- GPU: convertSquaredDifferencesToWeights");
+    time_convert_A = timer.setNew("-  - GPU: convertSquaredDifferencesToWeights A");
+    time_convert_B = timer.setNew("-  - GPU: convertSquaredDifferencesToWeights B");
+    time_convert_C = timer.setNew("-  - GPU: convertSquaredDifferencesToWeights C");
+    time_convert_D = timer.setNew("-  - GPU: convertSquaredDifferencesToWeights D");
+    time_convert_E = timer.setNew("-  - GPU: convertSquaredDifferencesToWeights E");
+    time_wsum = timer.setNew("- GPU: storeWeightedSums");
 #endif
 
     if (do_print_metadata_labels)
@@ -1967,14 +1981,38 @@ void MlOptimiser::expectationSomeParticlesOnCUDA(long int my_first_ori_particle,
 #ifdef CHECK_RESULT
         getAllSquaredDifferences();
 #endif
+#ifdef TIMING
+        timer.tic(time_copy);
+#endif
         cuda_solver.copyWindowsedImagesToGPU();
+#ifdef TIMING
+        timer.toc(time_copy);
+        timer.tic(time_shift);
+#endif
         cuda_solver.getShiftedImages();
+#ifdef TIMING
+        timer.toc(time_shift);
+        timer.tic(time_square);
+#endif
         cuda_solver.getSquaredDifference();
+#ifdef TIMING
+        timer.toc(time_square);
+        timer.tic(time_convert);
+#endif
         cuda_solver.convertSquaredDifferencesToWeights();
+#ifdef TIMING
+        timer.toc(time_convert);
+#endif
     }
     fprintf(stderr, "\n================ store weight =================\n");
     exp_current_image_size = mymodel.current_size;
+#ifdef TIMING
+    timer.tic(time_wsum);
+#endif
     storeWeightedSums();
+#ifdef TIMING
+    timer.toc(time_wsum);
+#endif
 }
 
 
@@ -4624,7 +4662,10 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
                     } // end if !do_skip_maximization
 
                 }// end if iover_rot
-            }// end loop do_proceed
+            } else {
+                std::cerr << "    CPU isNotSignificantAnyParticleAnyTranslation " << iorientclass << std::endl;
+                continue;
+            }
 
         } // end loop ipsi
     } // end loop idir
@@ -4670,16 +4711,44 @@ void MlOptimiser::doThreadStoreWeightedSumsAllOrientations(int thread_id)
         }
 
 #ifdef CHECK_RESULT
-        exp_wsum_scale_correction_XA_backup = thr_wsum_scale_correction_XA;
-        exp_wsum_scale_correction_AA_backup = thr_wsum_scale_correction_AA;
-        exp_wsum_norm_correction_backup = thr_wsum_norm_correction;
-        exp_wsum_sigma2_noise_backup = thr_wsum_sigma2_noise;
-        exp_sumw_group_backup = thr_sumw_group;
-        exp_wsum_prior_offsetx_class_backup = thr_wsum_prior_offsetx_class;
-        exp_wsum_prior_offsety_class_backup = thr_wsum_prior_offsety_class;
-        exp_wsum_pdf_class_backup = thr_wsum_pdf_class;
-        exp_wsum_pdf_direction_backup = thr_wsum_pdf_direction;
-        exp_wsum_sigma2_offset_backup = thr_wsum_sigma2_offset;
+        if (exp_iclass == iclass_min)
+        {
+            exp_wsum_scale_correction_XA_backup = thr_wsum_scale_correction_XA;
+            exp_wsum_scale_correction_AA_backup = thr_wsum_scale_correction_AA;
+            exp_wsum_norm_correction_backup = thr_wsum_norm_correction;
+            exp_wsum_sigma2_noise_backup = thr_wsum_sigma2_noise;
+            exp_sumw_group_backup = thr_sumw_group;
+            exp_wsum_prior_offsetx_class_backup = thr_wsum_prior_offsetx_class;
+            exp_wsum_prior_offsety_class_backup = thr_wsum_prior_offsety_class;
+            exp_wsum_pdf_class_backup = thr_wsum_pdf_class;
+            exp_wsum_pdf_direction_backup = thr_wsum_pdf_direction;
+            exp_wsum_sigma2_offset_backup = thr_wsum_sigma2_offset;
+        }
+        else
+        {
+            for (int n = 0; n < exp_nr_particles; n++)
+            {
+                exp_wsum_scale_correction_XA_backup[n] += thr_wsum_scale_correction_XA[n];
+                exp_wsum_scale_correction_AA_backup[n] += thr_wsum_scale_correction_AA[n];
+                exp_wsum_norm_correction_backup[n] += thr_wsum_norm_correction[n];
+            }
+            for (int n = 0; n < mymodel.nr_groups; n++)
+            {
+                exp_wsum_sigma2_noise_backup[n] += thr_wsum_sigma2_noise[n];
+                exp_sumw_group_backup[n] += thr_sumw_group[n];
+            }
+            for (int n = 0; n < mymodel.nr_classes; n++)
+            {
+                exp_wsum_pdf_class_backup[n] += thr_wsum_pdf_class[n];
+                if (mymodel.ref_dim == 2)
+                {
+                    exp_wsum_prior_offsetx_class_backup[n] += thr_wsum_prior_offsetx_class[n];
+                    exp_wsum_prior_offsety_class_backup[n] += thr_wsum_prior_offsety_class[n];
+                }
+                exp_wsum_pdf_direction_backup[n] += thr_wsum_pdf_direction[n];
+            }
+            exp_wsum_sigma2_offset_backup += thr_wsum_sigma2_offset;
+        }
 #endif
     } // end if !do_skip_maximization
 
@@ -4726,6 +4795,7 @@ void MlOptimiser::storeWeightedSums()
 
     assert(!use_cuda || this->strict_highres_exp <= 0.);
     if (!use_cuda)  {
+        /*
         // In doThreadPrecalculateShiftedImagesCtfsAndInvSigma2s() the origin of the exp_local_Minvsigma2s was omitted.
         // Set those back here
         for (long int ori_part_id = exp_my_first_ori_particle, ipart = 0; ori_part_id <= exp_my_last_ori_particle; ori_part_id++)
@@ -4749,6 +4819,7 @@ void MlOptimiser::storeWeightedSums()
                 }
             }
         }
+        */
     }
 
 
@@ -4795,7 +4866,6 @@ void MlOptimiser::storeWeightedSums()
                 exp_wsum_scale_correction_AA[n] = aux;
             }
         }
-
         bool do_cpu_sum_weights = !use_cuda;
 #ifdef CHECK_RESULT
         do_cpu_sum_weights = true;
@@ -4886,6 +4956,7 @@ void MlOptimiser::storeWeightedSums()
 
             } // end loop part_id (i)
         } // end loop ori_part_id
+
     } // end loop exp_iseries
 
 

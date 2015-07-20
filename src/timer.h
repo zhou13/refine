@@ -35,6 +35,7 @@
 // Uncomment next line timing functions are giving problems in your system
 //#define _NO_TIME
 #ifndef _NO_TIME
+#include <time.h>
 #include <unistd.h>
 #include <sys/times.h>
 #ifdef _IRIX65
@@ -243,10 +244,7 @@ class Timer
 {
 public:
     ///Start times for all individual timers
-    std::vector<timeval> start_times;
-
-    // General end time
-    timeval end_time;
+    std::vector<struct timespec> start_times;
 
     // How many times has each tic/toc been called.
     std::vector<int> counts;

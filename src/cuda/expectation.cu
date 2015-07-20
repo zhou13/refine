@@ -144,7 +144,7 @@ struct DeviceData {
                 sum += hdata[n + i*page_size];
             }
         }
-        printf("HASH DOUBLE  %3d: %.9f\n", count, sum);
+        // printf("HASH DOUBLE  %3d: %.9f\n", count, sum);
     }
 
     void copyArrayFromDeviceComplex(
@@ -168,7 +168,7 @@ struct DeviceData {
                 sum += hdata_i[n + i*page_size];
             }
         }
-        printf("HASH COMPLEX %3d: %.9f\n", count, sum);
+        // printf("HASH COMPLEX %3d: %.9f\n", count, sum);
     }
 
 };
@@ -271,6 +271,9 @@ void ExpectationCudaSolver::initialize()
               << "    max_xdim: " << max_xdim << std::endl
               << "    max_ydim: " << max_ydim << std::endl
               << "    max_nr_trans_samples: " << max_nr_trans_samples << std::endl;
+#ifdef TIMING
+    cudaThreadSynchronize();
+#endif
 }
 
 void ExpectationCudaSolver::copyWindowsedImagesToGPU()
@@ -389,6 +392,9 @@ void ExpectationCudaSolver::copyWindowsedImagesToGPU()
         printf("    invSigma2's error rate is %.5f%%\n", error_rate);
     }
 #endif
+#ifdef TIMING
+    cudaThreadSynchronize();
+#endif
 }
 
 void ExpectationCudaSolver::getShiftedImages()
@@ -490,6 +496,10 @@ void ExpectationCudaSolver::getShiftedImages()
             std::cerr << "    fshift_nomask's error rate is " << error_rate << "%" << std::endl;
         }
     }
+#endif
+
+#ifdef TIMING
+    cudaThreadSynchronize();
 #endif
 }
 
@@ -654,68 +664,82 @@ void ExpectationCudaSolver::getSquaredDifference()
         }
     }
 #endif
+#ifdef TIMING
+    cudaThreadSynchronize();
+#endif
 }
 
 void ExpectationCudaSolver::convertSquaredDifferencesToWeights()
 {
+#ifdef TIMING
+    ml->timer.tic(ml->time_convert_A);
+#endif
+
     int mydim = h->nr_image * h->nr_class * h->nr_trans * h->nr_orient;
     vector<float> weight;
+
     d->weight->ToHost(weight, mydim);
 
     ml->exp_Mweight.resize(h->nr_image, ml->mymodel.nr_classes * ml->sampling.NrSamplingPoints(ml->exp_current_oversampling, false));
     ml->exp_min_diff2.resize(h->nr_image);
 
-    for (int i = 0; i < mydim; ++i) {
-        int index = i;
-        int over_trans = index % ml->exp_nr_oversampled_trans;
-        index /= ml->exp_nr_oversampled_trans;
-        int over_rot = index % ml->exp_nr_oversampled_rot;
-        index /= ml->exp_nr_oversampled_rot;
-        int itrans = index % ml->exp_nr_trans;
-        index /= ml->exp_nr_trans;
-        int irot = index % ml->exp_nr_rot;
-        index /= ml->exp_nr_rot;
-        int iclass = index % h->nr_class;
-        index /= h->nr_class;
-        int image = index;
-
-        int my_trans = over_trans + ml->exp_nr_oversampled_trans * itrans;
-        int my_rot = over_rot + ml->exp_nr_oversampled_rot * irot;
-        index = my_trans + h->nr_trans*(my_rot + h->nr_orient*(iclass + h->nr_class*image));
-        DIRECT_MULTIDIM_ELEM(ml->exp_Mweight, i) = weight[index];
-    }
-
+#ifdef TIMING
+    ml->timer.toc(ml->time_convert_A);
+    ml->timer.tic(ml->time_convert_B);
+#endif
+    // TODO OpenMP parallelization
+    for (int image = 0, i = 0; image < h->nr_image; ++image) for (int iclass = 0; iclass < h->nr_class; ++iclass)
+        for (int irot = 0; irot < ml->exp_nr_rot; ++irot) for (int itrans = 0; itrans < ml->exp_nr_trans; ++itrans)
+            for (int over_rot = 0; over_rot < ml->exp_nr_oversampled_rot; ++over_rot) for (int over_trans = 0; over_trans < ml->exp_nr_oversampled_trans; ++over_trans, ++i)
+            {
+                int my_trans = over_trans + ml->exp_nr_oversampled_trans * itrans;
+                int my_rot = over_rot + ml->exp_nr_oversampled_rot * irot;
+                int index = my_trans + h->nr_trans*(my_rot + h->nr_orient*(iclass + h->nr_class*image));
+                DIRECT_MULTIDIM_ELEM(ml->exp_Mweight, i) = weight[index];
+            }
     vector<uint32_t> min_diff2i;
     d->min_diff2->ToHost(min_diff2i, h->nr_image);
     for (int i = 0; i < h->nr_image; ++i) {
         ml->exp_min_diff2[i] = reverseFlipFloat(min_diff2i[i]);
     }
 
+#ifdef TIMING
+    ml->timer.toc(ml->time_convert_B);
+    ml->timer.tic(ml->time_convert_C);
+#endif
+
     ml->convertAllSquaredDifferencesToWeights();
 
-    for (int i = 0; i < mydim; ++i) {
-        int index = i;
-        int over_trans = index % ml->exp_nr_oversampled_trans;
-        index /= ml->exp_nr_oversampled_trans;
-        int over_rot = index % ml->exp_nr_oversampled_rot;
-        index /= ml->exp_nr_oversampled_rot;
-        int itrans = index % ml->exp_nr_trans;
-        index /= ml->exp_nr_trans;
-        int irot = index % ml->exp_nr_rot;
-        index /= ml->exp_nr_rot;
-        int iclass = index % h->nr_class;
-        index /= h->nr_class;
-        int image = index;
+#ifdef TIMING
+    cudaThreadSynchronize();
+    ml->timer.toc(ml->time_convert_C);
+    ml->timer.tic(ml->time_convert_D);
+#endif
 
-        int my_trans = over_trans + ml->exp_nr_oversampled_trans * itrans;
-        int my_rot = over_rot + ml->exp_nr_oversampled_rot * irot;
-        index = my_trans + h->nr_trans*(my_rot + h->nr_orient*(iclass + h->nr_class*image));
-        weight[index] = DIRECT_MULTIDIM_ELEM(ml->exp_Mweight, i);
-    }
+    // TODO: OpenMP parallelization!
+    for (int image = 0, i = 0; image < h->nr_image; ++image) for (int iclass = 0; iclass < h->nr_class; ++iclass)
+        for (int irot = 0; irot < ml->exp_nr_rot; ++irot) for (int itrans = 0; itrans < ml->exp_nr_trans; ++itrans)
+            for (int over_rot = 0; over_rot < ml->exp_nr_oversampled_rot; ++over_rot) for (int over_trans = 0; over_trans < ml->exp_nr_oversampled_trans; ++over_trans, ++i)
+            {
+                int my_trans = over_trans + ml->exp_nr_oversampled_trans * itrans;
+                int my_rot = over_rot + ml->exp_nr_oversampled_rot * irot;
+                int index = my_trans + h->nr_trans*(my_rot + h->nr_orient*(iclass + h->nr_class*image));
+                weight[index] = DIRECT_MULTIDIM_ELEM(ml->exp_Mweight, i);
+            }
+
+#ifdef TIMING
+    ml->timer.toc(ml->time_convert_D);
+    ml->timer.tic(ml->time_convert_E);
+#endif
 
     d->weight->FromHost(weight, mydim);
     d->weight_sig->FromHost(vector<float>(ml->exp_significant_weight.begin(), ml->exp_significant_weight.end()), h->nr_image);
     d->weight_sum->FromHost(vector<float>(ml->exp_sum_weight.begin(), ml->exp_sum_weight.end()), h->nr_image);
+
+#ifdef TIMING
+    cudaThreadSynchronize();
+    ml->timer.toc(ml->time_convert_E);
+#endif
 }
 
 void ExpectationCudaSolver::sumWeights()
@@ -889,8 +913,8 @@ void ExpectationCudaSolver::sumWeights()
                 continue;
             fweight_error += check_relative_diff(ml->exp_Fweight_backup[index], fweight[i], 0.001, 0.05, "Fweight", false);
             fimg_error += check_relative_diff(ml->exp_Fimgs_backup[index], fimg[i], 0.001, 0.05, "Fimgs", false);
-            ++fweight_count;
-            ++fimg_count;
+            fweight_count += ml->exp_Fweight_backup[index].nzyxdim;
+            fimg_count += ml->exp_Fimgs_backup[index].nzyxdim;
         }
 #endif
 
@@ -902,7 +926,7 @@ void ExpectationCudaSolver::sumWeights()
             ml->sampling.getOrientations(idir, ipsi, ml->adaptive_oversampling, oversampled_orientations);
 
             if (!ml->isSignificantAnyParticleAnyTranslation(iorientclass)) {
-                std::cerr << "    isNotSignificantAnyParticleAnyTranslation " << iorientclass << std::endl;
+                std::cerr << "    CUDA isNotSignificantAnyParticleAnyTranslation " << iorientclass << std::endl;
                 continue;
             }
 
@@ -1083,4 +1107,8 @@ void ExpectationCudaSolver::sumWeights()
             DIRECT_A2D_ELEM(ml->exp_metadata, my_image_no, METADATA_PMAX) = DIRECT_A2D_ELEM(metadata, my_image_no, METADATA_PMAX);
         }
     }
+
+#ifdef TIMING
+    cudaThreadSynchronize();
+#endif
 }

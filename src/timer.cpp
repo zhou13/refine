@@ -202,7 +202,8 @@ void Timer::initZero()
 
 int Timer::setNew(const std::string tag)
 {
-    start_times.push_back(end_time);
+    struct timespec ts;
+    start_times.push_back(ts);
     counts.push_back(0);
     times.push_back(0);
     tags.push_back(tag);
@@ -211,15 +212,17 @@ int Timer::setNew(const std::string tag)
 
 void Timer::tic(int timer)
 {
-    gettimeofday(&(start_times[timer]), NULL);
+    clock_gettime(CLOCK_MONOTONIC, &(start_times[timer]));
     counts[timer]++;
 }
 
 int Timer::toc(int timer)
 {
-    gettimeofday(&end_time, NULL);
+    // General end time
+    struct timespec end_time;
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
     times[timer] += (end_time.tv_sec - start_times[timer].tv_sec) * 1000000 +
-                   (end_time.tv_usec - start_times[timer].tv_usec);
+                   (end_time.tv_nsec - start_times[timer].tv_nsec) / 1000;
 }
 
 void Timer::printTimes(bool doClear)
@@ -229,7 +232,9 @@ void Timer::printTimes(bool doClear)
         if (counts[i] > 0)
         {
             std::cout.width(35);
-            std::cout << std::left << tags[i] << ": " << times[i]/1000000<< " sec (" << times[i] / counts[i] << " microsec/operation)"<<std::endl;
+            std::cout << std::left << tags[i] << ": " << times[i] /1000
+                      << " millisec (" << times[i] / counts[i] << " microsec/operation  "
+                      << counts[i] << " times)" <<std::endl;
         }
     }
     if (doClear)

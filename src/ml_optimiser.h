@@ -610,6 +610,18 @@ public:
     int TIMING_EXP, TIMING_MAX, TIMING_RECONS;
     int TIMING_ESP, TIMING_ESP_READ, TIMING_ESP_DIFF1, TIMING_ESP_DIFF2;
     int TIMING_ESP_WEIGHT1, TIMING_ESP_WEIGHT2, TIMING_WEIGHT_EXP, TIMING_WEIGHT_SORT, TIMING_ESP_WSUM;
+    int TIMING_ZYC_A, TIMING_ZYC_B, TIMING_ZYC_C;
+
+    int time_copy;
+    int time_shift;
+    int time_square;
+    int time_convert;
+    int time_convert_A;
+    int time_convert_B;
+    int time_convert_C;
+    int time_convert_D;
+    int time_convert_E;
+    int time_wsum;
 #endif
 
 public:
